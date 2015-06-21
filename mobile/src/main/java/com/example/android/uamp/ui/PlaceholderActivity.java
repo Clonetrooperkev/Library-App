@@ -30,7 +30,7 @@ public class PlaceholderActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_placeholder);
         initializeToolbar();
-        setTitle("Bangarange");
+        setTitle("Bangarangeasas");
 
     }
 //Lololollol
