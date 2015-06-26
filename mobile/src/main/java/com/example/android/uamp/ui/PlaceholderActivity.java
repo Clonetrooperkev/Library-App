@@ -16,28 +16,31 @@
 package com.example.android.uamp.ui;
 
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
 import com.example.android.uamp.R;
+import com.example.android.uamp.utils.LogHelper;
+
+import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Placeholder activity for features that are not implemented in this sample, but
  * are in the navigation drawer.
  */
-public class PlaceholderActivity extends BaseActivity {
+public class PlaceholderActivity extends ActionBarCastActivity {
+    private static final String TAG = LogHelper.makeLogTag(PlaceholderActivity.class);
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        LogHelper.w(TAG, "Testing Joe");
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_placeholder);
+        setContentView(R.layout.activity_calendar);
         initializeToolbar();
         setTitle("Bangarangeasas");
 
+
     }
-//Lololollol
+
 }
-//HOOHAA
 
-//thththghkcls
-//add
-
-//Rebel scum

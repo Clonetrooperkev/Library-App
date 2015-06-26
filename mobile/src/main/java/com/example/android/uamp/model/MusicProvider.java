@@ -48,7 +48,7 @@ public class MusicProvider {
 
     private static final String CATALOG_URL =
         //"http://storage.googleapis.com/automotive-media/music.json";
-    "http://10.0.2.2/music.json";
+    "http://ec2-52-27-8-17.us-west-2.compute.amazonaws.com/music.json";
 
     public static final String CUSTOM_METADATA_TRACK_SOURCE = "__SOURCE__";
     private static final String JSON_MUSIC = "music";

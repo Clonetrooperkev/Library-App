@@ -17,6 +17,7 @@ package com.example.android.uamp.ui;
 
 import android.content.Context;
 
+import com.example.calendarquickstart.MainActivity;
 import com.example.android.uamp.R;
 
 import java.util.ArrayList;
@@ -36,15 +37,15 @@ public class DrawerMenuContents {
         items = new ArrayList<>(3);
 
         activities[0] = MusicPlayerActivity.class;
-        items.add(populateDrawerItem(ctx.getString(R.string.drawer_allmusic_title),
-            R.drawable.ic_allmusic_black_24dp));
+        items.add(populateDrawerItem("Catalog",
+            R.drawable.ic_search_category_default));
 
-        activities[1] = PlaceholderActivity.class;
-        items.add(populateDrawerItem(ctx.getString(R.string.drawer_playlists_title),
-            R.drawable.ic_playlist_music_black_24dp));
+        activities[1] = com.example.calendarquickstart.MainActivity.class;
+        items.add(populateDrawerItem("Calendar",
+            R.drawable.ic_menu_my_calendar));
         activities[2] = PlaceholderActivity.class;
-        items.add(populateDrawerItem("Test",
-                R.drawable.ic_playlist_music_black_24dp));
+        items.add(populateDrawerItem("Contacts",
+                R.drawable.ic_menu_info_details));
     }
 
     public List<Map<String, ?>> getItems() {
