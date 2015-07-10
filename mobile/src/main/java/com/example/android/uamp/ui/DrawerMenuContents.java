@@ -17,7 +17,7 @@ package com.example.android.uamp.ui;
 
 import android.content.Context;
 
-import com.example.calendarquickstart.MainActivity;
+import com.example.android.uamp.MainActivity;
 import com.example.android.uamp.R;
 
 import java.util.ArrayList;
@@ -40,7 +40,7 @@ public class DrawerMenuContents {
         items.add(populateDrawerItem("Catalog",
             R.drawable.ic_search_category_default));
 
-        activities[1] = com.example.calendarquickstart.MainActivity.class;
+        activities[1] = com.example.android.uamp.ui.MainActivity.class;
         items.add(populateDrawerItem("Calendar",
             R.drawable.ic_menu_my_calendar));
         activities[2] = PlaceholderActivity.class;

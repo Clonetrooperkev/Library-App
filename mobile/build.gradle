@@ -45,6 +45,7 @@ repositories {
     flatDir {
         dirs 'libs'
     }
+    mavenCentral()
 }
 
 dependencies {
@@ -60,7 +61,7 @@ dependencies {
     compile 'com.google.api-client:google-api-client-android:1.20.0'
     compile 'com.google.api-client:google-api-client-gson:1.20.0'
     compile 'com.google.apis:google-api-services-calendar:v3-rev125-1.20.0'
-
+    compile 'com.google.apis:google-api-services-calendar:v3-rev129-1.20.0'
     compile (name:'CastCompanionLibrary-debug', ext:'aar')
     compile 'com.github.amlcurran.showcaseview:library:5.0.0'
 }

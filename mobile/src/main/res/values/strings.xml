@@ -19,8 +19,8 @@
     <string name="app_name">Cape May Library App</string>
     <string name="favorite">Favorite</string>
     <string name="error_no_metadata">Unable to retrieve metadata.</string>
-    <string name="browse_genres">Library App</string>
-    <string name="browse_genre_subtitle">Cape May Library</string>
+    <string name="browse_genres">Catalog</string>
+    <string name="browse_genre_subtitle">Check here to browse for your selection</string>
     <string name="browse_musics_by_genre_subtitle">%1$s songs</string>
     <string name="random_queue_title">Random music</string>
     <string name="error_no_connection">Cannot connect to server. Please, check your Internet connectivity.</string>

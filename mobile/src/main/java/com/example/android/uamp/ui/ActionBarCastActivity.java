@@ -68,7 +68,7 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
-    private DrawerMenuContents mDrawerMenuContents;
+    public DrawerMenuContents mDrawerMenuContents;
 
     private boolean mToolbarInitialized;
 
