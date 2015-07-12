@@ -128,7 +128,6 @@ public class MainContactsActivity extends ActionBarCastActivity {
                     String contactName = ((TextView) view.findViewById(R.id.contact_name)).getText().toString();
 
                     Toast.makeText(getApplicationContext(), contactName, Toast.LENGTH_SHORT).show();
-                    position += -1;
                     if (position >= 0) {
                         Bundle extras = ActivityOptions.makeCustomAnimation(
                                 MainContactsActivity.this, R.anim.fade_in, R.anim.fade_out).toBundle();

@@ -1,6 +1,7 @@
 package com.example.android.uamp.ui;
 
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -11,10 +12,16 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.method.ScrollingMovementMethod;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.android.uamp.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.api.client.extensions.android.http.AndroidHttp;
@@ -29,21 +36,24 @@ import com.google.api.services.calendar.CalendarScopes;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 
 //Set toolbar if we can.
-public class MainCalendarActivity extends Activity {
+public class MainCalendarActivity extends ActionBarCastActivity {
     /**
      * A Google Calendar API service object used to access the API.
      * Note: Do not confuse this class with API library's model classes, which
      * represent specific data structures.
      */
+    List<String> calendarArray = new ArrayList<String>();
+    ListView listview;
+    ArrayAdapter adapter;
     public Calendar mService;
 
     GoogleCredential credential;
-    private TextView mResultsText;
     final HttpTransport transport = AndroidHttp.newCompatibleTransport();
     final JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
     ProgressDialog mProgressDialog;
@@ -75,27 +85,10 @@ public class MainCalendarActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LinearLayout activityLayout = new LinearLayout(this);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT);
-        activityLayout.setLayoutParams(lp);
-        activityLayout.setOrientation(LinearLayout.VERTICAL);
-        activityLayout.setPadding(16, 16, 16, 16);
-        //initializeToolbar();
-        ViewGroup.LayoutParams tlp = new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
+        setContentView(R.layout.activity_calendar);
+        initializeToolbar();
+        setTitle("Calendar");
 
-
-        mResultsText = new TextView(this);
-        mResultsText.setLayoutParams(tlp);
-        mResultsText.setPadding(16, 16, 16, 16);
-        mResultsText.setVerticalScrollBarEnabled(true);
-        mResultsText.setMovementMethod(new ScrollingMovementMethod());
-        activityLayout.addView(mResultsText);
-
-        setContentView(activityLayout);
         mProgressDialog = new ProgressDialog(MainCalendarActivity.this);
         // Set progressdialog title
         mProgressDialog.setTitle("Retrieving Calendar Data");
@@ -106,27 +99,7 @@ public class MainCalendarActivity extends Activity {
         mProgressDialog.show();
         // Initialize credentials and service object.
         SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
-        /*credential = GoogleAccountCredential.usingOAuth2(
-                getApplicationContext(), Arrays.asList(SCOPES))
-                .setBackOff(new ExponentialBackOff())
-                //.setSelectedAccountName(settings.getString(PREF_ACCOUNT_NAME, null));
-                .setSelectedAccountName("clonetrooperkev@gmail.com");
-*/
-/*
-    public static GoogleCredential createCredentialForServiceAccount(
-            HttpTransport transport,
-            JsonFactory jsonFactory,
-            Iterable<String> serviceAccountScopes,
-            File p12File) throws GeneralSecurityException, IOException {
-        return new GoogleCredential.Builder().setTransport(transport)
-                .setJsonFactory(jsonFactory)
-                .setServiceAccountId("585418159223-6rckrmro68eksm0485gm59apnl9p5unn@developer.gserviceaccount.com")
-                .setServiceAccountScopes(SCOPES)
-                .setServiceAccountPrivateKeyFromP12File(new File("C:\\Users\\Kevin\\Desktop\\Android TestA\\kevinpermissions.json"))
-                .build();
-    }
-}
-*/
+
         File currentDir = new File("storage/sdcard/kevintesting-267d28d845bb.p12");
         //File currentDir = new File("mnt/shell/emulated/0/kevintesting-267d28d845bb.p12");
 
@@ -238,7 +211,6 @@ public class MainCalendarActivity extends Activity {
             public void run() {
                 mProgressDialog.setMessage("Retrieving data...");
 
-                mResultsText.setText("");
             }
         });
     }
@@ -265,8 +237,27 @@ public class MainCalendarActivity extends Activity {
                 } else {
                     mProgressDialog.setMessage("Data retrieved using" +
                             " the Google Calendar API:");
+                    ListView lv = (ListView) findViewById(R.id.calendarlist);
+                    lv.setAdapter(new ArrayAdapter<String>(MainCalendarActivity.this, R.layout.calendarlist_item, R.id.calendar_name, dataStrings));
+                    lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-                    mResultsText.setText(TextUtils.join("\n\n", dataStrings));
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                            String calendarName = ((TextView) view.findViewById(R.id.calendar_name)).getText().toString();
+
+                            Toast.makeText(getApplicationContext(), calendarName, Toast.LENGTH_SHORT).show();
+                            if (position >= 0) {
+                                Bundle extras = ActivityOptions.makeCustomAnimation(
+                                        MainCalendarActivity.this, R.anim.fade_in, R.anim.fade_out).toBundle();
+
+                                Class activityClass = mDrawerMenuContents.getActivity(position);
+                                startActivity(new Intent(MainCalendarActivity.this, activityClass), extras);
+                                finish();
+                            }
+
+                        }
+                    });
                 }
                 mProgressDialog.dismiss();
             }
