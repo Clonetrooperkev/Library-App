@@ -2,7 +2,7 @@ package com.example.android.uamp.ui;
 
 import android.os.AsyncTask;
 
-import com.example.android.uamp.ui.MainActivity;
+import com.example.android.uamp.ui.MainCalendarActivity;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 import com.google.api.client.util.DateTime;
@@ -18,13 +18,13 @@ import java.util.List;
  * Placing the API calls in their own task ensures the UI stays responsive.
  */
 public class ApiAsyncTask extends AsyncTask<Void, Void, Void> {
-    private MainActivity mActivity;
+    private MainCalendarActivity mActivity;
 
     /**
      * Constructor.
      * @param activity MainActivity that spawned this task.
      */
-    ApiAsyncTask(MainActivity activity) {
+    ApiAsyncTask(MainCalendarActivity activity) {
         this.mActivity = activity;
     }
 
@@ -45,7 +45,7 @@ public class ApiAsyncTask extends AsyncTask<Void, Void, Void> {
         } catch (UserRecoverableAuthIOException userRecoverableException) {
             mActivity.startActivityForResult(
                     userRecoverableException.getIntent(),
-                    MainActivity.REQUEST_AUTHORIZATION);
+                    MainCalendarActivity.REQUEST_AUTHORIZATION);
 
         } catch (IOException e) {
             mActivity.updateStatus("The following error occurred: " +

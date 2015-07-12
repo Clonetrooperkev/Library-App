@@ -20,7 +20,6 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -35,20 +34,16 @@ import com.example.android.uamp.utils.LogHelper;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Placeholder activity for features that are not implemented in this sample, but
  * are in the navigation drawer.
  */
-public class PlaceholderActivity extends ActionBarCastActivity {
-    private static final String TAG = LogHelper.makeLogTag(PlaceholderActivity.class);
+public class MainContactsActivity extends ActionBarCastActivity {
+    private static final String TAG = LogHelper.makeLogTag(MainContactsActivity.class);
     List<String> contactsArray = new ArrayList<String>();
     List<String> urlArray = new ArrayList<String>();
     ListView listview;
@@ -58,7 +53,7 @@ public class PlaceholderActivity extends ActionBarCastActivity {
     public void onCreate(Bundle savedInstanceState) {
         LogHelper.w(TAG, "Testing Joe");
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_calendar);
+        setContentView(R.layout.activity_contacts);
         initializeToolbar();
         setTitle("Contacts");
         //setContentView(R.layout.activity_placeholder);
@@ -73,7 +68,7 @@ public class PlaceholderActivity extends ActionBarCastActivity {
         protected void onPreExecute() {
             super.onPreExecute();
             // Create a progressdialog
-            mProgressDialog = new ProgressDialog(PlaceholderActivity.this);
+            mProgressDialog = new ProgressDialog(MainContactsActivity.this);
             // Set progressdialog title
             mProgressDialog.setTitle("Retrieving Contact Data");
             // Set progressdialog message
@@ -123,23 +118,23 @@ public class PlaceholderActivity extends ActionBarCastActivity {
         @Override
         protected void onPostExecute(Void args) {
 
-            ListView lv = (ListView) findViewById(R.id.actresslist);
-            lv.setAdapter(new ArrayAdapter<String>(com.example.android.uamp.ui.PlaceholderActivity.this, R.layout.list_item, R.id.actress_name, contactsArray));
+            ListView lv = (ListView) findViewById(R.id.contactslist);
+            lv.setAdapter(new ArrayAdapter<String>(MainContactsActivity.this, R.layout.contactlist_item, R.id.contact_name, contactsArray));
             lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                    String actressName = ((TextView) view.findViewById(R.id.actress_name)).getText().toString();
+                    String contactName = ((TextView) view.findViewById(R.id.contact_name)).getText().toString();
 
-                    Toast.makeText(getApplicationContext(), actressName, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), contactName, Toast.LENGTH_SHORT).show();
                     position += -1;
                     if (position >= 0) {
                         Bundle extras = ActivityOptions.makeCustomAnimation(
-                                PlaceholderActivity.this, R.anim.fade_in, R.anim.fade_out).toBundle();
+                                MainContactsActivity.this, R.anim.fade_in, R.anim.fade_out).toBundle();
 
                         Class activityClass = mDrawerMenuContents.getActivity(position);
-                        startActivity(new Intent(PlaceholderActivity.this, activityClass), extras);
+                        startActivity(new Intent(MainContactsActivity.this, activityClass), extras);
                         finish();
                     }
 

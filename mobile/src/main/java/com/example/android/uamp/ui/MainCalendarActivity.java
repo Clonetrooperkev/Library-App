@@ -1,11 +1,11 @@
-package com.example.android.uamp;
+package com.example.android.uamp.ui;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -15,7 +15,6 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.example.android.uamp.ApiAsyncTask;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.api.client.extensions.android.http.AndroidHttp;
@@ -33,22 +32,25 @@ import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
 
-public class MainActivity extends Activity {
+
+//Set toolbar if we can.
+public class MainCalendarActivity extends Activity {
     /**
      * A Google Calendar API service object used to access the API.
      * Note: Do not confuse this class with API library's model classes, which
      * represent specific data structures.
      */
-    Calendar mService;
+    public Calendar mService;
 
     GoogleCredential credential;
-    private TextView mStatusText;
     private TextView mResultsText;
     final HttpTransport transport = AndroidHttp.newCompatibleTransport();
     final JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
+    ProgressDialog mProgressDialog;
+
 
     static final int REQUEST_ACCOUNT_PICKER = 1000;
-    static final int REQUEST_AUTHORIZATION = 1001;
+    public static final int REQUEST_AUTHORIZATION = 1001;
     static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
     private static final String PREF_ACCOUNT_NAME = "clonetrooperkev@gmail.com";
     private static final String ASCOPES[] = {CalendarScopes.CALENDAR_READONLY};
@@ -71,7 +73,7 @@ public class MainActivity extends Activity {
      * @param savedInstanceState previously saved instance data.
      */
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         LinearLayout activityLayout = new LinearLayout(this);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
@@ -80,16 +82,11 @@ public class MainActivity extends Activity {
         activityLayout.setLayoutParams(lp);
         activityLayout.setOrientation(LinearLayout.VERTICAL);
         activityLayout.setPadding(16, 16, 16, 16);
-
+        //initializeToolbar();
         ViewGroup.LayoutParams tlp = new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
 
-        mStatusText = new TextView(this);
-        mStatusText.setLayoutParams(tlp);
-        mStatusText.setTypeface(null, Typeface.BOLD);
-        mStatusText.setText("Retrieving data...");
-        activityLayout.addView(mStatusText);
 
         mResultsText = new TextView(this);
         mResultsText.setLayoutParams(tlp);
@@ -99,7 +96,14 @@ public class MainActivity extends Activity {
         activityLayout.addView(mResultsText);
 
         setContentView(activityLayout);
-
+        mProgressDialog = new ProgressDialog(MainCalendarActivity.this);
+        // Set progressdialog title
+        mProgressDialog.setTitle("Retrieving Calendar Data");
+        // Set progressdialog message
+        mProgressDialog.setMessage("Fetching...");
+        mProgressDialog.setIndeterminate(false);
+        // Show progressdialog
+        mProgressDialog.show();
         // Initialize credentials and service object.
         SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
         /*credential = GoogleAccountCredential.usingOAuth2(
@@ -168,13 +172,14 @@ public class MainActivity extends Activity {
 
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         if (isGooglePlayServicesAvailable()) {
             refreshResults();
         } else {
-            mStatusText.setText("Google Play Services required: " +
+            mProgressDialog.setMessage("Google Play Services required: " +
                     "after installing, close and relaunch this app.");
+
         }
     }
 
@@ -216,7 +221,8 @@ public class MainActivity extends Activity {
             if (isDeviceOnline()) {
                 new ApiAsyncTask(this).execute();
             } else {
-                mStatusText.setText("No network connection available.");
+                mProgressDialog.setMessage("No network connection available.");
+
             }
         }
 
@@ -230,7 +236,8 @@ public class MainActivity extends Activity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mStatusText.setText("Retrieving data�");
+                mProgressDialog.setMessage("Retrieving data...");
+
                 mResultsText.setText("");
             }
         });
@@ -246,15 +253,22 @@ public class MainActivity extends Activity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+
                 if (dataStrings == null) {
-                    mStatusText.setText("Error retrieving data!");
+                    mProgressDialog.setMessage("Error retrieving data!");
+
+
                 } else if (dataStrings.size() == 0) {
-                    mStatusText.setText("No data found.");
+                    mProgressDialog.setMessage("No data found.");
+
+
                 } else {
-                    mStatusText.setText("Data retrieved using" +
+                    mProgressDialog.setMessage("Data retrieved using" +
                             " the Google Calendar API:");
+
                     mResultsText.setText(TextUtils.join("\n\n", dataStrings));
                 }
+                mProgressDialog.dismiss();
             }
         });
     }
@@ -268,7 +282,9 @@ public class MainActivity extends Activity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mStatusText.setText(message);
+                mProgressDialog.setMessage(message);
+
+
             }
         });
     }
@@ -302,7 +318,7 @@ public class MainActivity extends Activity {
      * @return true if Google Play Services is available and up to
      *     date on this device; false otherwise.
      */
-    private boolean isGooglePlayServicesAvailable() {
+    public boolean isGooglePlayServicesAvailable() {
         final int connectionStatusCode =
                 GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
         if (GooglePlayServicesUtil.isUserRecoverableError(connectionStatusCode)) {
@@ -320,14 +336,14 @@ public class MainActivity extends Activity {
      * @param connectionStatusCode code describing the presence (or lack of)
      *     Google Play Services on this device.
      */
-    void showGooglePlayServicesAvailabilityErrorDialog(
+    public void showGooglePlayServicesAvailabilityErrorDialog(
             final int connectionStatusCode) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 Dialog dialog = GooglePlayServicesUtil.getErrorDialog(
                         connectionStatusCode,
-                        MainActivity.this,
+                        MainCalendarActivity.this,
                         REQUEST_GOOGLE_PLAY_SERVICES);
                 dialog.show();
             }
