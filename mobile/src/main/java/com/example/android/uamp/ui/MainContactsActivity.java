@@ -16,6 +16,7 @@
 package com.example.android.uamp.ui;
 
 import android.app.ActivityOptions;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -49,8 +50,10 @@ public class MainContactsActivity extends ActionBarCastActivity {
     ListView listview;
     ArrayAdapter adapter;
     ProgressDialog mProgressDialog;
+    boolean contactsUnavailableError;
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        contactsUnavailableError = false;
         LogHelper.w(TAG, "Testing Joe");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contacts);
@@ -82,6 +85,8 @@ public class MainContactsActivity extends ActionBarCastActivity {
         protected Void doInBackground(Void... params) {
             // Create the array
             // YQL JSON URL
+// For Future            String url = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20html%20where%20url%3D%22http%3A%2F%2Fwww.cmclibrary.org%2Fabout-the-library%2Fcontact-us%22%20and%20xpath%3D%22%2F%2Fdiv%5B%40class%3D'component-content%20rt-joomla'%5D%22&format=json&callback=";
+
             String url = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20html%20where%20url%3D%22http%3A%2F%2Fwww.cmclibrary.org%2Fabout-the-library%2Fcontact-us%22%20and%20xpath%3D%22%2F%2Fdiv%5B%40class%3D'component-content%20rt-joomla'%5D%22&format=json&callback=";
 
             try {
@@ -107,6 +112,8 @@ public class MainContactsActivity extends ActionBarCastActivity {
                 }
 
             } catch (JSONException e) {
+                contactsUnavailableError = true;
+
                 Log.e("Error", e.getMessage());
                 e.printStackTrace();
             }
@@ -120,6 +127,8 @@ public class MainContactsActivity extends ActionBarCastActivity {
 
             ListView lv = (ListView) findViewById(R.id.contactslist);
             lv.setAdapter(new ArrayAdapter<String>(MainContactsActivity.this, R.layout.contactlist_item, R.id.contact_name, contactsArray));
+            //lv.setAdapter(new ArrayAdapter<String>(MainContactsActivity.this, R.layout.contactlist_item, R.id.contact_desc, contactsArray));
+
             lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
                 @Override
@@ -139,6 +148,9 @@ public class MainContactsActivity extends ActionBarCastActivity {
 
                 }
             });
+            if (contactsUnavailableError) {
+                Toast.makeText(getApplicationContext(), "Contact Information Unavailable", Toast.LENGTH_LONG).show();
+            }
             mProgressDialog.dismiss();
         }
     }

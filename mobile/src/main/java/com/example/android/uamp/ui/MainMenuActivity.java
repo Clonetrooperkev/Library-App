@@ -56,7 +56,7 @@ public class MainMenuActivity extends ActionBarCastActivity {
 
                 String actressName = ((TextView) view.findViewById(R.id.menu_item)).getText().toString();
 
-                Toast.makeText(getApplicationContext(), actressName, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(), actressName, Toast.LENGTH_SHORT).show();
                 position += -1;
                 if (position >= 0) {
                     Bundle extras = ActivityOptions.makeCustomAnimation(

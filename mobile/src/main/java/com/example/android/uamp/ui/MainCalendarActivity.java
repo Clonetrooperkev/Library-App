@@ -34,7 +34,10 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -99,8 +102,23 @@ public class MainCalendarActivity extends ActionBarCastActivity {
         mProgressDialog.show();
         // Initialize credentials and service object.
         SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
+        //File currentDir = new File("storage/sdcard/kevintesting-267d28d845bb.p12");
+        try {
+            InputStream inputStream = null;
+            inputStream = getResources().openRawResource(R.raw.kevintesting267d28d845bb);
+            byte[] buffer = new byte[inputStream.available()];
+            inputStream.read(buffer);
 
-        File currentDir = new File("storage/sdcard/kevintesting-267d28d845bb.p12");
+            File targetFile = new File("/sdcard/key.tmp");
+            OutputStream outStream = new FileOutputStream(targetFile);
+            outStream.write(buffer);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        File currentDir = new File ("/sdcard/key.tmp");
+
         //File currentDir = new File("mnt/shell/emulated/0/kevintesting-267d28d845bb.p12");
 
 
