@@ -30,6 +30,7 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.SecurityUtils;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 
@@ -39,6 +40,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.GeneralSecurityException;
+import java.security.KeyStoreException;
+import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -102,37 +105,10 @@ public class MainCalendarActivity extends ActionBarCastActivity {
         mProgressDialog.show();
         // Initialize credentials and service object.
         SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
-        //File currentDir = new File("storage/sdcard/kevintesting-267d28d845bb.p12");
         try {
-            InputStream inputStream = null;
-            inputStream = getResources().openRawResource(R.raw.kevintesting267d28d845bb);
-            byte[] buffer = new byte[inputStream.available()];
-            inputStream.read(buffer);
-
-            File targetFile = new File("/sdcard/key.tmp");
-            OutputStream outStream = new FileOutputStream(targetFile);
-            outStream.write(buffer);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        File currentDir = new File ("/sdcard/key.tmp");
-
-        //File currentDir = new File("mnt/shell/emulated/0/kevintesting-267d28d845bb.p12");
-
-
-        /*File[] files = currentDir.listFiles(new FilenameFilter() {
-
-                @Override
-                public boolean accept(File dir, String filename) {
-                    return filename.toLowerCase().endsWith(".*");
-                }
-            });
-*/
-        try {
-            //InputStream KevStream = MainActivity.class.getResourceAsStream("storage/sdcard/kevinpermissions.json");
-            //PrivateKey serviceAccountPrivateKey = SecurityUtils.loadPrivateKeyFromKeyStore(SecurityUtils.getPkcs12KeyStore(), MainActivity.class.getResourceAsStream("/kevinpermissions.json"), "notasecret", "privatekey", "notasecret");
+            //Download Private Key from Google Service Account and place it in the the raw folder in the project.
+            PrivateKey serviceAccountPrivateKey = SecurityUtils.loadPrivateKeyFromKeyStore(SecurityUtils.getPkcs12KeyStore(), getResources().openRawResource(R.raw.kevintesting267d28d845bb), "notasecret", "privatekey", "notasecret");
+            //Get email address for the service account
             String emailAddress = "585418159223-0ss5e3fqknchu9h5m23tdd5s2vek4m3m@developer.gserviceaccount.com";
             JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
             HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
@@ -140,19 +116,19 @@ public class MainCalendarActivity extends ActionBarCastActivity {
                     .setTransport(httpTransport)
                     .setJsonFactory(JSON_FACTORY)
                     .setServiceAccountId(emailAddress)
-                    .setServiceAccountPrivateKeyFromP12File(currentDir)
-                    //.setServiceAccountPrivateKey(serviceAccountPrivateKey)
+                    .setServiceAccountPrivateKey(serviceAccountPrivateKey)
                     .setServiceAccountScopes(SCOPES)
                     .build();
         }
-            catch (GeneralSecurityException e) {
-                e.printStackTrace();
+        catch (KeyStoreException e) {
+            e.printStackTrace();
         }
-            catch (IOException e) {
-                e.printStackTrace();
+        catch (IOException e){
+            e.printStackTrace();
         }
-
-
+        catch (GeneralSecurityException e){
+            e.printStackTrace();
+        }
 
     mService=new Calendar.Builder(
         transport,jsonFactory,credential)

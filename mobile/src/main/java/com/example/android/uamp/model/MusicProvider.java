@@ -18,6 +18,8 @@ package com.example.android.uamp.model;
 
 import android.media.MediaMetadata;
 import android.os.AsyncTask;
+import android.util.MutableInt;
+import android.webkit.CookieSyncManager;
 
 import com.example.android.uamp.utils.LogHelper;
 
@@ -26,17 +28,28 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
+import java.net.CookieStore;
+import java.net.HttpCookie;
+import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import javax.net.ssl.HttpsURLConnection;
 
 /**
  * Utility class to get a list of MusicTrack's based on a server-side JSON
@@ -238,15 +251,36 @@ public class MusicProvider {
 
     private synchronized void retrieveMedia() {
         try {
+            sendGet();
+        }
+        catch(Exception e){
+            LogHelper.e(TAG,e,"Things be wacky");
+        }
+        try {
             if (mCurrentState == State.NON_INITIALIZED) {
                 mCurrentState = State.INITIALIZING;
-
                 int slashPos = CATALOG_URL.lastIndexOf('/');
                 String path = CATALOG_URL.substring(0, slashPos + 1);
                 JSONObject jsonObj = fetchJSONFromUrl(CATALOG_URL);
                 if (jsonObj == null) {
                     return;
                 }
+
+                    CookieManager cookieManager = new CookieManager();
+                    CookieHandler.setDefault(cookieManager);
+                    HttpCookie cookie = new HttpCookie("lang", "en");
+                    cookie.setDomain("cmclibrary.org");
+                    cookie.setPath("/");
+                    cookie.setVersion(0);
+
+                    cookieManager.getCookieStore().add(new URI("http://cat.cmclibrary.org/"), cookie);
+                JSONObject libObj = fetchJSONFromUrl("http://cat.cmclibrary.org/polaris/search/searchresults.aspx?ctx=1.1033.0.0.3&type=Keyword&term=b");
+                if (libObj == null) {
+                    return;
+                }
+
+
+
                 JSONArray tracks = jsonObj.getJSONArray(JSON_MUSIC);
                 if (tracks != null) {
                     for (int j = 0; j < tracks.length(); j++) {
@@ -260,7 +294,13 @@ public class MusicProvider {
             }
         } catch (JSONException e) {
             LogHelper.e(TAG, e, "Could not retrieve music list");
-        } finally {
+
+        }
+        catch(java.net.URISyntaxException e){
+            LogHelper.e(TAG, e, "Java URI Exception");
+        }
+
+        finally {
             if (mCurrentState != State.INITIALIZED) {
                 // Something bad happened, so we reset state to NON_INITIALIZED to allow
                 // retries (eg if the network connection is temporary unavailable)
@@ -320,9 +360,12 @@ public class MusicProvider {
     private JSONObject fetchJSONFromUrl(String urlString) {
         BufferedReader reader = null;
         try {
-            URLConnection urlConnection = new URL(urlString).openConnection();
+            HttpURLConnection urlConnection = (HttpURLConnection) new URL(urlString).openConnection();
+            //Map<String, List<String>> headerFields = urlConnection.getHeaderFields();
+            //List<String> cookiesHeader = headerFields.get("Set-Cookie");
             reader = new BufferedReader(new InputStreamReader(
                     urlConnection.getInputStream(), "iso-8859-1"));
+
             StringBuilder sb = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {
@@ -342,4 +385,76 @@ public class MusicProvider {
             }
         }
     }
+    public void sendGet() throws Exception {
+        String url = "http://cat.cmclibrary.org/polaris/search/searchresults.aspx?ctx=1.1033.0.0.3&type=Keyword&term=b";
+        //String url = "http://cat.cmclibrary.org/polaris/search/searchresults.aspx?ctx=1.1033.0.0.3&type=Keyword&term=b&by=KW&sort=RELEVANCE&limit=TOM=*&query=&page=0&searchid=2";
+        String cookie = "";
+        String cookie1 = "";
+        String url1 = "http://cat.cmclibrary.org/polaris/search/components/ajaxResults.aspx?page=1";
+        String USER_AGENT = "Chrome/43.0.2357.134";
+        CookieHandler.setDefault( new CookieManager( null, CookiePolicy.ACCEPT_ALL ) );
+
+        URL obj = new URL(url);
+
+
+        HttpURLConnection.setFollowRedirects(true);
+        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+        con.setRequestMethod("GET");
+        con.setRequestProperty("User-Agent", USER_AGENT);
+        int responseCode = con.getResponseCode();
+        responseCode = con.getResponseCode();
+        String key, keyhdr;
+        for (int i = 1; (key = con.getHeaderFieldKey(i)) != null; i++) {
+            keyhdr = con.getHeaderField(i);
+            if (key.equals("Set-Cookie")) {
+                if (cookie != null && !cookie.isEmpty()){
+                    cookie1 = con.getHeaderField(i);
+                }
+                else{
+                    cookie = con.getHeaderField(i);
+                }
+            }
+        }
+        cookie+=";";
+        cookie+=cookie1;
+        con.disconnect();
+        URL obj1 = new URL(url1);
+        HttpURLConnection con1 = (HttpURLConnection) obj.openConnection();
+        //con1.setRequestProperty("Set-Cookie", cookie);
+        //con1.setRequestProperty("CSP", "active");
+        //con1.setRequestProperty("Accept", "*/*");
+        //con1.setRequestProperty("Content-Type", "text/plain; charset=utf-8");
+        HttpURLConnection.setFollowRedirects(true);
+        //con1 = (HttpURLConnection) obj1.openConnection();
+        con1.setRequestMethod("GET");
+        responseCode = con1.getResponseCode();
+        System.out.println("\nSending 'GET' request to URL : " + url);
+        System.out.println("Response Code : " + responseCode);
+
+        BufferedReader in = new BufferedReader(
+                new InputStreamReader(con1.getInputStream()));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
+
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+        con1 = (HttpURLConnection) obj1.openConnection();
+        responseCode = con1.getResponseCode();
+        BufferedReader in1 = new BufferedReader(
+                new InputStreamReader(con1.getInputStream()));
+        String inputLine1;
+        StringBuffer response1 = new StringBuffer();
+
+        while ((inputLine1 = in1.readLine()) != null) {
+            response1.append(inputLine1);
+        }
+        in.close();
+        //print result
+        System.out.println(response.toString());
+
+    }
+
+
 }
