@@ -36,7 +36,7 @@ public class DrawerMenuContents {
         activities = new Class[3];
         items = new ArrayList<>(3);
 
-        activities[0] = MusicPlayerActivity.class;
+        activities[0] = MainCatalogActivity.class;
         items.add(populateDrawerItem("Catalog",
             R.drawable.ic_search_category_default));
 

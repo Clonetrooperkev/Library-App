@@ -18,6 +18,8 @@ package com.example.android.uamp.ui;
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -32,12 +34,34 @@ import android.widget.Toast;
 import com.example.android.uamp.R;
 import com.example.android.uamp.utils.LogHelper;
 
+import org.htmlcleaner.CleanerProperties;
+import org.htmlcleaner.HtmlCleaner;
+import org.htmlcleaner.TagNode;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
 
 /**
  * Placeholder activity for features that are not implemented in this sample, but
@@ -51,6 +75,7 @@ public class MainContactsActivity extends ActionBarCastActivity {
     ArrayAdapter adapter;
     ProgressDialog mProgressDialog;
     boolean contactsUnavailableError;
+    String copiedtext;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         contactsUnavailableError = false;
@@ -83,6 +108,7 @@ public class MainContactsActivity extends ActionBarCastActivity {
 
         @Override
         protected Void doInBackground(Void... params) {
+
             // Create the array
             // YQL JSON URL
 // For Future            String url = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20html%20where%20url%3D%22http%3A%2F%2Fwww.cmclibrary.org%2Fabout-the-library%2Fcontact-us%22%20and%20xpath%3D%22%2F%2Fdiv%5B%40class%3D'component-content%20rt-joomla'%5D%22&format=json&callback=";
@@ -127,8 +153,6 @@ public class MainContactsActivity extends ActionBarCastActivity {
 
             ListView lv = (ListView) findViewById(R.id.contactslist);
             lv.setAdapter(new ArrayAdapter<String>(MainContactsActivity.this, R.layout.contactlist_item, R.id.contact_name, contactsArray));
-            //lv.setAdapter(new ArrayAdapter<String>(MainContactsActivity.this, R.layout.contactlist_item, R.id.contact_desc, contactsArray));
-
             lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
                 @Override
@@ -154,6 +178,8 @@ public class MainContactsActivity extends ActionBarCastActivity {
             mProgressDialog.dismiss();
         }
     }
+
+
 
 }
 
