@@ -1,0 +1,36 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:appcompat="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/tools">
+
+    <item
+        android:id="@+id/menu_search"
+        android:title="@string/menu_search"
+        appcompat:actionViewClass="android.support.v7.widget.SearchView"
+        appcompat:showAsAction="always"/>
+    <item
+        android:id="@+id/menu_searchby"
+        android:orderInCategory="1"
+        app:showAsAction="never"
+        android:title="@string/searchby_string">
+        <menu>
+            <group android:checkableBehavior="single">
+            <item android:id="@+id/searchby_any"
+                android:checked = "true"
+                android:title="@string/searchby_any" />
+            <item android:id="@+id/searchby_title"
+                android:title="@string/searchby_title" />
+            <item android:id="@+id/searchby_author"
+                android:title="@string/searchby_author" />
+            <item android:id="@+id/searchby_ISBN"
+                android:title="@string/searchby_ISBN" />
+            </group>
+        </menu>
+    </item>
+    <item
+        android:id="@+id/menu_format"
+        android:orderInCategory="2"
+        app:showAsAction="never"
+        android:title="@string/format_string"/>
+
+
+</menu>

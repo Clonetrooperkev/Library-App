@@ -18,14 +18,22 @@ package com.example.android.uamp.ui;
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.app.SearchManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Bundle;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -54,9 +62,11 @@ import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -70,36 +80,107 @@ import javax.xml.xpath.XPathFactory;
  */
 public class MainCatalogActivity extends ActionBarCastActivity {
     private static final String TAG = LogHelper.makeLogTag(MainCatalogActivity.class);
+    public String searchresults = "a";
     List<String> CatalogArray = new ArrayList<String>();
     List<String> urlArray = new ArrayList<String>();
     ListView listview;
     ArrayAdapter adapter;
     ProgressDialog mProgressDialog;
     boolean catalogUnavailableError;
-    String copiedtext;
+    MenuItem searchby_any_MenuItem;
+    MenuItem searchby_author_MenuItem;
+    MenuItem searchby_ISBN_MenuItem;
+    MenuItem searchby_title_MenuItem;
+    SearchView searchView;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         catalogUnavailableError = false;
         LogHelper.w(TAG, "Testing Joe");
         super.onCreate(savedInstanceState);
+        handleIntent(getIntent());
+
+    }
+    @Override
+    protected void onNewIntent(Intent intent) {
+        searchView.setFocusable(false);
+
+        handleIntent(intent);
+    }
+
+    public void handleIntent(Intent intent) {
+        CatalogArray.clear();
         setContentView(R.layout.activity_catalog);
+            Bundle extras = intent.getExtras();
+            if(extras == null) {
+                searchresults= null;
+            } else {
+                searchresults= extras.getString("SEARCHVALUE");
+            }
         initializeToolbar();
         setTitle("Catalog");
         //setContentView(R.layout.activity_placeholder);
-
         new DownloadJSON().execute();
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.searchby_any:
+                if (item.isChecked()) item.setChecked(false);
+                else item.setChecked(true);
+                return true;
+            case R.id.searchby_author:
+                if (item.isChecked()) item.setChecked(false);
+                else item.setChecked(true);
+                return true;
+            case R.id.searchby_title:
+                if (item.isChecked()) item.setChecked(false);
+                else item.setChecked(true);
+                return true;
+            case R.id.searchby_ISBN:
+                if (item.isChecked()) item.setChecked(false);
+                else item.setChecked(true);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        // Inflate menu to add items to action bar if it is present.
+        inflater.inflate(R.menu.menu_main, menu);
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager =
+                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        searchView =
+                (SearchView) menu.findItem(R.id.menu_search).getActionView();
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(getComponentName()));
+        MenuItem searchbyMenu = menu.findItem(R.id.menu_searchby);
+        SubMenu submenu = searchbyMenu.getSubMenu();
+        searchby_any_MenuItem = submenu.findItem(R.id.searchby_any);
+        searchby_author_MenuItem = submenu.findItem(R.id.searchby_author);
+        searchby_ISBN_MenuItem = submenu.findItem(R.id.searchby_ISBN);
+        searchby_title_MenuItem = submenu.findItem(R.id.searchby_title);
+
+
+
+            return true;
     }
     // DownloadJSON AsyncTask
     private class DownloadJSON extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected void onPreExecute() {
+            /*
             ClipboardManager myClipboard;
             myClipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
             ClipData cp = myClipboard.getPrimaryClip();
             ClipData.Item item = cp.getItemAt(0);
-            copiedtext = item.getText().toString();
+
+            catalogSearchText = item.getText().toString();
+            */
             super.onPreExecute();
             // Create a progressdialog
             mProgressDialog = new ProgressDialog(MainCatalogActivity.this);
@@ -157,10 +238,28 @@ public class MainCatalogActivity extends ActionBarCastActivity {
     }
 
     public void doBookSearch() throws Exception {
-        String url = "http://cat.cmclibrary.org/polaris/search/searchresults.aspx?ctx=1.1033.0.0.3&type=Keyword&term=";
-
-        url+=copiedtext;
+        String Qurl = "http://cat.cmclibrary.org/polaris/search/searchresults.aspx?ctx=1.1033.0.0.3&type=Keyword&term=";
+        String bookSort = "&limit=TOM=bks";
+        String authSort = "&by=AU";
+        String titleSort = "&by=TI";
+        String ISBNSort = "&by=ISBN";
+        if (searchresults == ""){
+            searchresults = "b";
+        }
         String url1 = "http://cat.cmclibrary.org/polaris/search/components/ajaxResults.aspx?page=1";
+        String url = Qurl + URLEncoder.encode(searchresults, "UTF-8");
+        //url += bookSort;
+        if (searchby_any_MenuItem.isChecked() ){
+        }
+        if (searchby_title_MenuItem.isChecked() ){
+            url+=titleSort;
+        }
+        if (searchby_author_MenuItem.isChecked() ){
+            url+=authSort;
+        }
+        if (searchby_ISBN_MenuItem.isChecked() ){
+            url+=ISBNSort;
+        }
         String USER_AGENT = "Chrome/43.0.2357.134";
         CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
         URL obj = new URL(url);

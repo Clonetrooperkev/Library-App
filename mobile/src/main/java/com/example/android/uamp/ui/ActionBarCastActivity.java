@@ -62,7 +62,7 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
 
     private static final int DELAY_MILLIS = 1000;
 
-    private VideoCastManager mCastManager;
+    //private VideoCastManager mCastManager;
     private MenuItem mMediaRouteMenuItem;
     private Toolbar mToolbar;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -160,10 +160,10 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
         LogHelper.d(TAG, "Activity onCreate");
 
         // Ensure that Google Play Service is available.
-        VideoCastManager.checkGooglePlayServices(this);
+       // VideoCastManager.checkGooglePlayServices(this);
 
-        mCastManager = VideoCastManager.getInstance();
-        mCastManager.reconnectSessionIfPossible();
+        //mCastManager = VideoCastManager.getInstance();
+        //mCastManager.reconnectSessionIfPossible();
     }
 
     @Override
@@ -186,8 +186,8 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        mCastManager.addVideoCastConsumer(mCastConsumer);
-        mCastManager.incrementUiCounter();
+        //mCastManager.addVideoCastConsumer(mCastConsumer);
+        //mCastManager.incrementUiCounter();
 
         // Whenever the fragment back stack changes, we may need to update the
         // action bar toggle: only top level screens show the hamburger-like icon, inner
@@ -206,8 +206,8 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        mCastManager.removeVideoCastConsumer(mCastConsumer);
-        mCastManager.decrementUiCounter();
+        //mCastManager.removeVideoCastConsumer(mCastConsumer);
+        //mCastManager.decrementUiCounter();
         getFragmentManager().removeOnBackStackChangedListener(mBackStackChangedListener);
     }
 
@@ -215,7 +215,7 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.main, menu);
-        mMediaRouteMenuItem = mCastManager.addMediaRouterButton(menu, R.id.media_route_menu_item);
+        //mMediaRouteMenuItem = mCastManager.addMediaRouterButton(menu, R.id.media_route_menu_item);
         return true;
     }
 

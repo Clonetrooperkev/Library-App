@@ -17,7 +17,6 @@ package com.example.android.uamp;
 
 import android.app.Application;
 
-import com.example.android.uamp.ui.FullScreenPlayerActivity;
 import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
 
 import static com.google.android.libraries.cast.companionlibrary.cast.BaseCastManager.FEATURE_DEBUGGING;
@@ -26,8 +25,8 @@ import static com.google.android.libraries.cast.companionlibrary.cast.BaseCastMa
 /**
  * The {@link Application} for the uAmp application.
  */
-public class UAMPApplication extends Application {
-
+public class CMCLibraryApplication extends Application {
+/*
     @Override
     public void onCreate() {
         super.onCreate();
@@ -36,4 +35,5 @@ public class UAMPApplication extends Application {
                 getApplicationContext(), applicationId, FullScreenPlayerActivity.class, null);
         castManager.enableFeatures(FEATURE_WIFI_RECONNECT | FEATURE_DEBUGGING);
     }
+    */
 }
