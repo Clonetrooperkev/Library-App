@@ -23,6 +23,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Bundle;
@@ -97,6 +98,10 @@ public class MainCatalogActivity extends ActionBarCastActivity {
         catalogUnavailableError = false;
         LogHelper.w(TAG, "Testing Joe");
         super.onCreate(savedInstanceState);
+        SharedPreferences settings = getSharedPreferences("settings", 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.remove("settings");
+        editor.commit();
         handleIntent(getIntent());
 
     }
@@ -124,29 +129,29 @@ public class MainCatalogActivity extends ActionBarCastActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.searchby_any:
-                if (item.isChecked()) item.setChecked(false);
-                else item.setChecked(true);
-                return true;
-            case R.id.searchby_author:
-                if (item.isChecked()) item.setChecked(false);
-                else item.setChecked(true);
-                return true;
-            case R.id.searchby_title:
-                if (item.isChecked()) item.setChecked(false);
-                else item.setChecked(true);
-                return true;
-            case R.id.searchby_ISBN:
-                if (item.isChecked()) item.setChecked(false);
-                else item.setChecked(true);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        String SelectedMenu;
+        if (item.isCheckable()) {
+            item.setChecked(!item.isChecked());
+            if(item.getOrder() >= 10){
+                SelectedMenu = "SearchBy";
+            }
+            else{
+                SelectedMenu = "Format";
+            }
+            if(item.isChecked()){
+                SharedPreferences settings = getSharedPreferences("settings", 0);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putInt(SelectedMenu, item.getItemId());
+                editor.commit();
+            }
+            return true;
         }
+        return super.onOptionsItemSelected(item);
+
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        MenuItem searchByItem;
         MenuInflater inflater = getMenuInflater();
         // Inflate menu to add items to action bar if it is present.
         inflater.inflate(R.menu.menu_main, menu);
@@ -157,16 +162,24 @@ public class MainCatalogActivity extends ActionBarCastActivity {
                 (SearchView) menu.findItem(R.id.menu_search).getActionView();
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
+
         MenuItem searchbyMenu = menu.findItem(R.id.menu_searchby);
         SubMenu submenu = searchbyMenu.getSubMenu();
         searchby_any_MenuItem = submenu.findItem(R.id.searchby_any);
         searchby_author_MenuItem = submenu.findItem(R.id.searchby_author);
         searchby_ISBN_MenuItem = submenu.findItem(R.id.searchby_ISBN);
         searchby_title_MenuItem = submenu.findItem(R.id.searchby_title);
+        SharedPreferences settings = getSharedPreferences("settings", 0);
+        int CheckedItem = settings.getInt("SearchBy", 0);
+        if(CheckedItem != 0){
+            searchByItem = menu.findItem(CheckedItem);
+        }
+        else{
+            searchByItem = searchby_any_MenuItem;
+        }
+        searchByItem.setChecked(true);
 
-
-
-            return true;
+        return true;
     }
     // DownloadJSON AsyncTask
     private class DownloadJSON extends AsyncTask<Void, Void, Void> {
@@ -239,26 +252,24 @@ public class MainCatalogActivity extends ActionBarCastActivity {
 
     public void doBookSearch() throws Exception {
         String Qurl = "http://cat.cmclibrary.org/polaris/search/searchresults.aspx?ctx=1.1033.0.0.3&type=Keyword&term=";
-        String bookSort = "&limit=TOM=bks";
-        String authSort = "&by=AU";
-        String titleSort = "&by=TI";
-        String ISBNSort = "&by=ISBN";
+        //String bookSort = "&limit=TOM=bks";
         if (searchresults == ""){
             searchresults = "b";
         }
         String url1 = "http://cat.cmclibrary.org/polaris/search/components/ajaxResults.aspx?page=1";
         String url = Qurl + URLEncoder.encode(searchresults, "UTF-8");
         //url += bookSort;
+
         if (searchby_any_MenuItem.isChecked() ){
         }
         if (searchby_title_MenuItem.isChecked() ){
-            url+=titleSort;
+            url+="&by=TI";
         }
         if (searchby_author_MenuItem.isChecked() ){
-            url+=authSort;
+            url+="&by=AU";
         }
         if (searchby_ISBN_MenuItem.isChecked() ){
-            url+=ISBNSort;
+            url+="&by=ISBN";
         }
         String USER_AGENT = "Chrome/43.0.2357.134";
         CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
