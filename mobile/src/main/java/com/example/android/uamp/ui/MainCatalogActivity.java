@@ -29,6 +29,7 @@ import android.os.Bundle;
 import android.os.Bundle;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -37,6 +38,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -80,6 +82,7 @@ import javax.xml.xpath.XPathFactory;
  * are in the navigation drawer.
  */
 public class MainCatalogActivity extends ActionBarCastActivity {
+    //private Context context = null;
     private static final String TAG = LogHelper.makeLogTag(MainCatalogActivity.class);
     public String searchresults = "a";
     List<String> CatalogArray = new ArrayList<String>();
@@ -92,7 +95,20 @@ public class MainCatalogActivity extends ActionBarCastActivity {
     MenuItem searchby_author_MenuItem;
     MenuItem searchby_ISBN_MenuItem;
     MenuItem searchby_title_MenuItem;
+    MenuItem format_any_MenuItem;
+    MenuItem format_book_MenuItem;
+    MenuItem format_large_print_MenuItem;
+    MenuItem format_audiobook_MenuItem;
+    MenuItem format_audio_ebook_MenuItem;
+    MenuItem format_ebook_MenuItem;
+    MenuItem format_dvd_MenuItem;
+    MenuItem format_Bray_disc_MenuItem;
+    MenuItem format_videotape_MenuItem;
+    MenuItem format_music_cd_MenuItem;
+    MenuItem format_sound_recording_MenuItem;
+    MenuItem format_serial_MenuItem;
     SearchView searchView;
+    int searchPage;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         catalogUnavailableError = false;
@@ -100,7 +116,7 @@ public class MainCatalogActivity extends ActionBarCastActivity {
         super.onCreate(savedInstanceState);
         SharedPreferences settings = getSharedPreferences("settings", 0);
         SharedPreferences.Editor editor = settings.edit();
-        editor.remove("settings");
+        editor.clear();
         editor.commit();
         handleIntent(getIntent());
 
@@ -113,14 +129,30 @@ public class MainCatalogActivity extends ActionBarCastActivity {
     }
 
     public void handleIntent(Intent intent) {
-        CatalogArray.clear();
+        String tempsearchresults = "";
+        String moreButton = "";
         setContentView(R.layout.activity_catalog);
-            Bundle extras = intent.getExtras();
-            if(extras == null) {
-                searchresults= null;
-            } else {
-                searchresults= extras.getString("SEARCHVALUE");
+        Bundle extras = intent.getExtras();
+        if(extras != null) {
+            if(extras.containsKey("SEARCHVALUE")) {
+                tempsearchresults= extras.getString("SEARCHVALUE");
             }
+            if(extras.containsKey("MOREBUTTON")){
+                moreButton= extras.getString("MOREBUTTON");
+            }
+
+        }
+        if(moreButton.equals("true")){
+            searchPage += 1;
+
+        }
+        else{
+            CatalogArray.clear();
+            searchPage = 1;
+            searchresults = tempsearchresults;
+        }
+
+
         initializeToolbar();
         setTitle("Catalog");
         //setContentView(R.layout.activity_placeholder);
@@ -132,7 +164,7 @@ public class MainCatalogActivity extends ActionBarCastActivity {
         String SelectedMenu;
         if (item.isCheckable()) {
             item.setChecked(!item.isChecked());
-            if(item.getOrder() >= 10){
+            if(item.getOrder() >= 20){
                 SelectedMenu = "SearchBy";
             }
             else{
@@ -169,6 +201,20 @@ public class MainCatalogActivity extends ActionBarCastActivity {
         searchby_author_MenuItem = submenu.findItem(R.id.searchby_author);
         searchby_ISBN_MenuItem = submenu.findItem(R.id.searchby_ISBN);
         searchby_title_MenuItem = submenu.findItem(R.id.searchby_title);
+        MenuItem formatSearch = menu.findItem(R.id.menu_format);
+        SubMenu subformatmenu = formatSearch.getSubMenu();
+        format_any_MenuItem = subformatmenu.findItem(R.id.format_any);
+        format_book_MenuItem = subformatmenu.findItem(R.id.format_book);
+        format_large_print_MenuItem = subformatmenu.findItem(R.id.format_large_print);
+        format_audiobook_MenuItem = subformatmenu.findItem(R.id.format_audiobook);
+        format_audio_ebook_MenuItem = subformatmenu.findItem(R.id.format_audio_ebook);
+        format_ebook_MenuItem = subformatmenu.findItem(R.id.format_ebook);
+        format_dvd_MenuItem = subformatmenu.findItem(R.id.format_dvd);
+        format_Bray_disc_MenuItem = subformatmenu.findItem(R.id.format_Bray_disc);
+        format_videotape_MenuItem = subformatmenu.findItem(R.id.format_videotape);
+        format_music_cd_MenuItem = subformatmenu.findItem(R.id.format_music_cd);
+        format_sound_recording_MenuItem = subformatmenu.findItem(R.id.format_sound_recording);
+        format_serial_MenuItem = subformatmenu.findItem(R.id.format_serial);
         SharedPreferences settings = getSharedPreferences("settings", 0);
         int CheckedItem = settings.getInt("SearchBy", 0);
         if(CheckedItem != 0){
@@ -176,6 +222,14 @@ public class MainCatalogActivity extends ActionBarCastActivity {
         }
         else{
             searchByItem = searchby_any_MenuItem;
+        }
+        searchByItem.setChecked(true);
+        CheckedItem = settings.getInt("Format", 0);
+        if(CheckedItem != 0){
+            searchByItem = menu.findItem(CheckedItem);
+        }
+        else{
+            searchByItem = format_any_MenuItem;
         }
         searchByItem.setChecked(true);
 
@@ -222,7 +276,26 @@ public class MainCatalogActivity extends ActionBarCastActivity {
         protected void onPostExecute(Void args) {
 
             ListView lv = (ListView) findViewById(R.id.cataloglist);
+
+            if(CatalogArray.size() != 0) {
+                View footerView = ((LayoutInflater) MainCatalogActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.footer, null, false);
+                lv.addFooterView(footerView);
+                Button forward = (Button) footerView.findViewById(R.id.loadMore);
+                forward.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        Bundle extras = ActivityOptions.makeCustomAnimation(
+                                MainCatalogActivity.this, R.anim.fade_in, R.anim.fade_out).toBundle();
+                        Intent searchIntent = new Intent(MainCatalogActivity.this, MainCatalogActivity.class);
+                        searchIntent.putExtra("MOREBUTTON", "true");
+                        searchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(searchIntent, extras);
+                    }
+                });
+            }
+
             lv.setAdapter(new ArrayAdapter<String>(MainCatalogActivity.this, R.layout.cataloglist_item, R.id.catalog_name, CatalogArray));
+
+
 
             lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -256,7 +329,8 @@ public class MainCatalogActivity extends ActionBarCastActivity {
         if (searchresults == ""){
             searchresults = "b";
         }
-        String url1 = "http://cat.cmclibrary.org/polaris/search/components/ajaxResults.aspx?page=1";
+        String url1 = "http://cat.cmclibrary.org/polaris/search/components/ajaxResults.aspx?page=";
+        url1 += String.valueOf(searchPage);
         String url = Qurl + URLEncoder.encode(searchresults, "UTF-8");
         //url += bookSort;
 
@@ -270,6 +344,42 @@ public class MainCatalogActivity extends ActionBarCastActivity {
         }
         if (searchby_ISBN_MenuItem.isChecked() ){
             url+="&by=ISBN";
+        }
+        if(format_any_MenuItem.isChecked()){
+
+        }
+        if(format_book_MenuItem.isChecked()){
+            url += "&limit=TOM=bks";
+        }
+        if(format_large_print_MenuItem.isChecked()){
+            url += "&limit=TOM=lpt";
+        }
+        if(format_audiobook_MenuItem.isChecked()){
+            url += "&limit=TOM=abk";
+        }
+        if(format_audio_ebook_MenuItem.isChecked()){
+            url += "&limit=TOM=aeb";
+        }
+        if(format_ebook_MenuItem.isChecked()){
+            url += "&limit=TOM=ebk";
+        }
+        if(format_dvd_MenuItem.isChecked()){
+            url += "&limit=TOM=dvd";
+        }
+        if(format_Bray_disc_MenuItem.isChecked()){
+            url += "&limit=TOM=brd";
+        }
+        if(format_videotape_MenuItem.isChecked()){
+            url += "&limit=TOM=vcr";
+        }
+        if(format_music_cd_MenuItem.isChecked()){
+            url += "&limit=TOM=mcd";
+        }
+        if(format_sound_recording_MenuItem.isChecked()){
+            url += "&limit=TOM=rec";
+        }
+        if(format_serial_MenuItem.isChecked()){
+            url += "&limit=TOM=ser";
         }
         String USER_AGENT = "Chrome/43.0.2357.134";
         CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));

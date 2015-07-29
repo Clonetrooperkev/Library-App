@@ -59,6 +59,19 @@
     <string name="searchby_title">Title</string>
     <string name="searchby_ISBN">ISBN</string>
     <string name="format_string">Format</string>
+    <string name="format_any">Any Format</string>
+    <string name="format_book">Book</string>
+    <string name="format_large_print">Large Print</string>
+    <string name="format_audiobook">Audiobook</string>
+    <string name="format_audio_ebook">Audio EBook</string>
+    <string name="format_ebook">Ebook</string>
+    <string name="format_dvd">DVD</string>
+    <string name="format_Bray_disc">Blu-ray Disc</string>
+    <string name="format_videotape">Videotape</string>
+    <string name="format_music_cd">Music CD</string>
+    <string name="format_sound_recording">Sound Recording</string>
+    <string name="format_serial">Serial</string>
     <string name="search_hint">Type and Search</string>
     <string name="menu_search">Search</string>
+    <string name="footer_text_1">More...</string>
 </resources>
