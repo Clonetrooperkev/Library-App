@@ -25,8 +25,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -67,25 +69,32 @@ import javax.xml.xpath.XPathFactory;
  * Placeholder activity for features that are not implemented in this sample, but
  * are in the navigation drawer.
  */
-public class MainContactsActivity extends ActionBarCastActivity {
-    private static final String TAG = LogHelper.makeLogTag(MainContactsActivity.class);
-    List<String> contactsArray = new ArrayList<String>();
-    List<String> urlArray = new ArrayList<String>();
+
+public class SubContactsActivity extends ActionBarCastActivity {
+    private static final String TAG = LogHelper.makeLogTag(SubContactsActivity.class);
+    List<String> subcontactsArray = new ArrayList<String>();
+    List<String> subphonesArray = new ArrayList<String>();
+    List<String> suburlArray = new ArrayList<String>();
     ListView listview;
     ArrayAdapter adapter;
     ProgressDialog mProgressDialog;
     boolean contactsUnavailableError;
     String copiedtext;
+    String subContactCategory;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         contactsUnavailableError = false;
-        LogHelper.w(TAG, "Testing Joe");
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_contacts);
+        setContentView(R.layout.sub_activity_contacts);
         initializeToolbar();
-        setTitle("Contacts");
-        //setContentView(R.layout.activity_placeholder);
-
+        setTitle("Contact");
+        Intent intent = getIntent();
+        Bundle extras = intent.getExtras();
+        if(extras != null) {
+            if(extras.containsKey("SUBCONTACTKEY")) {
+                subContactCategory= extras.getString("SUBCONTACTKEY");
+            }
+        }
         new DownloadJSON().execute();
 
     }
@@ -96,7 +105,7 @@ public class MainContactsActivity extends ActionBarCastActivity {
         protected void onPreExecute() {
             super.onPreExecute();
             // Create a progressdialog
-            mProgressDialog = new ProgressDialog(MainContactsActivity.this);
+            mProgressDialog = new ProgressDialog(SubContactsActivity.this);
             // Set progressdialog title
             mProgressDialog.setTitle("Retrieving Contact Data");
             // Set progressdialog message
@@ -112,29 +121,44 @@ public class MainContactsActivity extends ActionBarCastActivity {
             // Create the array
             // YQL JSON URL
 // For Future            String url = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20html%20where%20url%3D%22http%3A%2F%2Fwww.cmclibrary.org%2Fabout-the-library%2Fcontact-us%22%20and%20xpath%3D%22%2F%2Fdiv%5B%40class%3D'component-content%20rt-joomla'%5D%22&format=json&callback=";
-
-            String url = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20html%20where%20url%3D%22http%3A%2F%2Fwww.cmclibrary.org%2Fabout-the-library%2Fcontact-us%22%20and%20xpath%3D%22%2F%2Fdiv%5B%40class%3D'component-content%20rt-joomla'%5D%22&format=json&callback=";
-
+//%2F
+            String urlfront = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20html%20where%20url%20%3D%20%22http%3A%2F%2Fcmclibrary.org";
+            String urlmid = "/about-the-library/contact-us/118-adult-programing";
+            String urlback ="%22%20and%20xpath%20%3D%20%22%2F%2Ftable%5B%40class%20%3D%20'category'%5D%22&format=json&diagnostics=true&callback=";
+            String url = urlfront + subContactCategory + urlback;
             try {
                 // Retrive JSON Objects from the given URL in JSONfunctions.class
                 JSONObject json_data = JSONfunctions.getJSONfromURL(url);
                 JSONObject json_query = json_data.getJSONObject("query");
                 JSONObject json_results = json_query.getJSONObject("results");
-                JSONObject json_div1 = json_results.getJSONObject("div");
-                JSONObject json_div2 = json_div1.getJSONObject("div");
-                JSONObject json_ul = json_div2.getJSONObject("ul");
-                //JSONObject json_li = json_ul.getJSONObject("li");
-
-               // JSONObject json_json_li = json_ul.getJSONObject("json");
-                JSONArray json_result = json_ul.getJSONArray("li");
-                for (int i = 0; i < json_result.length(); i++) {
-                    JSONObject c = json_result.getJSONObject(i);
-                    JSONObject vo = c.getJSONObject("span");
-                    JSONObject va = vo.getJSONObject("a");
-                    contactsArray.add(va.optString("content"));
-                    urlArray.add(va.optString("href"));
+                JSONObject json_table = json_results.getJSONObject("table");
+                JSONObject json_tbody = json_table.getJSONObject("tbody");
 
 
+                JSONArray json_result = json_tbody.optJSONArray("tr");
+                if(json_result == null){
+                    JSONObject json_result1 = json_tbody.getJSONObject("tr");
+                    JSONArray json_tdA = json_result1.getJSONArray("td");
+                    JSONObject D = json_tdA.getJSONObject(0);
+                    JSONObject con1 = D.getJSONObject("a");
+                    subcontactsArray.add(con1.optString("content"));
+                    JSONObject Q = json_tdA.getJSONObject(2);
+                    subphonesArray.add(Q.optString("content"));
+                }
+
+                else {
+                    json_result = json_tbody.getJSONArray("tr");
+                    for (int i = 0; i < json_result.length(); i++) {
+                        JSONObject o = json_result.getJSONObject(i);
+                        JSONArray json_td1 = o.getJSONArray("td");
+                        JSONObject c = json_td1.getJSONObject(0);
+                        JSONObject con = c.getJSONObject("a");
+                        subcontactsArray.add(con.optString("content"));
+                        JSONObject p = json_td1.getJSONObject(2);
+                        subphonesArray.add(p.optString("content"));
+
+
+                    }
                 }
 
             } catch (JSONException e) {
@@ -148,32 +172,23 @@ public class MainContactsActivity extends ActionBarCastActivity {
             return null;
         }
 
+
         @Override
         protected void onPostExecute(Void args) {
+            //ContactDetailAdapter adapter = new ContactDetailAdapter(SubContactsActivity.this,subcontactsArray,subphonesArray);
+            //ListView lv = (ListView) findViewById(R.id.subcontactslist);
+            //lv.setAdapter(new ArrayAdapter<String>(SubContactsActivity.this, R.layout.sub_contactlist_item, R.id.sub_contact_name, subcontactsArray));
+            //lv1.setAdapter(new ArrayAdapter<String>(SubContactsActivity.this, R.layout.sub_contactlist_item, R.id.sub_contact_phone_name, subphonesArray));
+            //lv.setAdapter(adapter);
 
-            ListView lv = (ListView) findViewById(R.id.contactslist);
-            lv.setAdapter(new ArrayAdapter<String>(MainContactsActivity.this, R.layout.contactlist_item, R.id.contact_name, contactsArray));
-            lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            ContactDetailAdapter adapter = new ContactDetailAdapter(SubContactsActivity.this, R.layout.sub_contactlist_item, subcontactsArray, subphonesArray);
 
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                    String contactName = ((TextView) view.findViewById(R.id.contact_name)).getText().toString();
+            ListView lv = (ListView)findViewById(R.id.subcontactslist);
+            lv.setAdapter(adapter);
 
-                    Toast.makeText(getApplicationContext(), contactName, Toast.LENGTH_SHORT).show();
-                    if (position >= 0) {
-                        Bundle extras = ActivityOptions.makeCustomAnimation(
-                                MainContactsActivity.this, R.anim.fade_in, R.anim.fade_out).toBundle();
 
-                        Class activityClass = SubContactsActivity.class;
-                        Intent subIntent = new Intent(MainContactsActivity.this, activityClass);
-                        subIntent.putExtra("SUBCONTACTKEY", urlArray.get(position));
-                        startActivity (subIntent, extras);
-                        finish();
-                    }
 
-                }
-            });
             if (contactsUnavailableError) {
                 Toast.makeText(getApplicationContext(), "Contact Information Unavailable", Toast.LENGTH_LONG).show();
             }
