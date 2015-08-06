@@ -1,15 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
-
+    android:orientation="vertical">
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/catImage"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="10dp"
+        android:layout_centerHorizontal="true">
+    </ImageView>
     <TextView
         android:id="@+id/catalog_name"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="12dp"
-        android:textSize="20sp" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="23dp"
+        android:layout_marginTop="10dp"
+        android:textSize="15sp"
+        android:layout_toRightOf="@+id/catImage"
+        android:textColor="@color/black"
+        android:minLines="1"
+        android:maxLines="2"
+        />
+    <TextView
+        android:id="@+id/catalog_author"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="10sp"
+        android:layout_alignBottom="@+id/catImage"
+        android:layout_alignLeft="@+id/catalog_name"/>
+    <TextView
+        android:id="@+id/catalog_format"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="10sp"
+        android:layout_alignBottom="@+id/catalog_author"
+        android:layout_alignParentRight="true"
+        android:paddingRight="5dp"/>
 
 
-</LinearLayout>
+</RelativeLayout>

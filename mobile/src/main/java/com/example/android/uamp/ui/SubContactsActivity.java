@@ -117,60 +117,74 @@ public class SubContactsActivity extends ActionBarCastActivity {
 
         @Override
         protected Void doInBackground(Void... params) {
+            if(subContactCategory.equals(" Library Branches")){
+                subcontactsArray.add("Main Branch");
+                subphonesArray.add("609-463-6350");
+                subcontactsArray.add("Cape May City");
+                subphonesArray.add("609-884-9568");
+                subcontactsArray.add("Lower Township");
+                subphonesArray.add("609-886-8999");
+                subcontactsArray.add("Sea Isle City");
+                subphonesArray.add("609-263-7301");
+                subcontactsArray.add("Stone Harbor");
+                subphonesArray.add("609-36-86809");
+                subcontactsArray.add("Upper Township");
+                subphonesArray.add("609-628-2607");
+                subcontactsArray.add("Wildwood Crest");
+                subphonesArray.add("609-522-0564");
+                subcontactsArray.add("Woodbine");
+                subphonesArray.add("609-861-2501");
 
-            // Create the array
-            // YQL JSON URL
-// For Future            String url = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20html%20where%20url%3D%22http%3A%2F%2Fwww.cmclibrary.org%2Fabout-the-library%2Fcontact-us%22%20and%20xpath%3D%22%2F%2Fdiv%5B%40class%3D'component-content%20rt-joomla'%5D%22&format=json&callback=";
-//%2F
-            String urlfront = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20html%20where%20url%20%3D%20%22http%3A%2F%2Fcmclibrary.org";
-            String urlmid = "/about-the-library/contact-us/118-adult-programing";
-            String urlback ="%22%20and%20xpath%20%3D%20%22%2F%2Ftable%5B%40class%20%3D%20'category'%5D%22&format=json&diagnostics=true&callback=";
-            String url = urlfront + subContactCategory + urlback;
-            try {
-                // Retrive JSON Objects from the given URL in JSONfunctions.class
-                JSONObject json_data = JSONfunctions.getJSONfromURL(url);
-                JSONObject json_query = json_data.getJSONObject("query");
-                JSONObject json_results = json_query.getJSONObject("results");
-                JSONObject json_table = json_results.getJSONObject("table");
-                JSONObject json_tbody = json_table.getJSONObject("tbody");
-
-
-                JSONArray json_result = json_tbody.optJSONArray("tr");
-                if(json_result == null){
-                    JSONObject json_result1 = json_tbody.getJSONObject("tr");
-                    JSONArray json_tdA = json_result1.getJSONArray("td");
-                    JSONObject D = json_tdA.getJSONObject(0);
-                    JSONObject con1 = D.getJSONObject("a");
-                    subcontactsArray.add(con1.optString("content"));
-                    JSONObject Q = json_tdA.getJSONObject(2);
-                    subphonesArray.add(Q.optString("content"));
-                }
-
-                else {
-                    json_result = json_tbody.getJSONArray("tr");
-                    for (int i = 0; i < json_result.length(); i++) {
-                        JSONObject o = json_result.getJSONObject(i);
-                        JSONArray json_td1 = o.getJSONArray("td");
-                        JSONObject c = json_td1.getJSONObject(0);
-                        JSONObject con = c.getJSONObject("a");
-                        subcontactsArray.add(con.optString("content"));
-                        JSONObject p = json_td1.getJSONObject(2);
-                        subphonesArray.add(p.optString("content"));
-
-
-                    }
-                }
-
-            } catch (JSONException e) {
-                contactsUnavailableError = true;
-
-                Log.e("Error", e.getMessage());
-                e.printStackTrace();
             }
+            else {
+                String urlfront = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20html%20where%20url%20%3D%20%22http%3A%2F%2Fcmclibrary.org";
+                String urlmid = "/about-the-library/contact-us/118-adult-programing";
+                String urlback = "%22%20and%20xpath%20%3D%20%22%2F%2Ftable%5B%40class%20%3D%20'category'%5D%22&format=json&diagnostics=true&callback=";
+                String url = urlfront + subContactCategory + urlback;
+                try {
+                    // Retrive JSON Objects from the given URL in JSONfunctions.class
+                    JSONObject json_data = JSONfunctions.getJSONfromURL(url);
+                    JSONObject json_query = json_data.getJSONObject("query");
+                    JSONObject json_results = json_query.getJSONObject("results");
+                    JSONObject json_table = json_results.getJSONObject("table");
+                    JSONObject json_tbody = json_table.getJSONObject("tbody");
 
 
+                    JSONArray json_result = json_tbody.optJSONArray("tr");
+                    if (json_result == null) {
+                        JSONObject json_result1 = json_tbody.getJSONObject("tr");
+                        JSONArray json_tdA = json_result1.getJSONArray("td");
+                        JSONObject D = json_tdA.getJSONObject(0);
+                        JSONObject con1 = D.getJSONObject("a");
+                        subcontactsArray.add(con1.optString("content"));
+                        JSONObject Q = json_tdA.getJSONObject(2);
+                        subphonesArray.add(Q.optString("content"));
+                    } else {
+                        json_result = json_tbody.getJSONArray("tr");
+                        for (int i = 0; i < json_result.length(); i++) {
+                            JSONObject o = json_result.getJSONObject(i);
+                            JSONArray json_td1 = o.getJSONArray("td");
+                            JSONObject c = json_td1.getJSONObject(0);
+                            JSONObject con = c.getJSONObject("a");
+                            subcontactsArray.add(con.optString("content"));
+                            JSONObject p = json_td1.getJSONObject(2);
+                            subphonesArray.add(p.optString("content"));
+
+
+                        }
+                    }
+
+                } catch (JSONException e) {
+                    contactsUnavailableError = true;
+
+                    Log.e("Error", e.getMessage());
+                    e.printStackTrace();
+                }
+
+            }
             return null;
         }
+
 
 
         @Override

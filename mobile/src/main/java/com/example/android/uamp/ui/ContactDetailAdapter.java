@@ -46,9 +46,10 @@ public class ContactDetailAdapter extends ArrayAdapter<String> {
         //ListView subcontacts = (ListView)rowView.findViewById(R.id.subcontactslist);
         TextView nameView = (TextView) rowView.findViewById(R.id.sub_contact_name);
         TextView phoneView = (TextView) rowView.findViewById(R.id.sub_contact_phone_name);
-        Linkify.addLinks(phoneView, Linkify.PHONE_NUMBERS);
         nameView.setText(names.get(position));
         phoneView.setText(phones.get(position));
+        Linkify.addLinks(phoneView, Linkify.PHONE_NUMBERS);
+
         return rowView;
     }
 }

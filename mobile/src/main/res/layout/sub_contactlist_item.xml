@@ -18,6 +18,7 @@
         android:layout_below="@+id/sub_contact_name"
         android:layout_weight="1"
         android:padding="6dp"
+        android:clickable="true"
         android:textSize="10sp" />
 
 </LinearLayout>

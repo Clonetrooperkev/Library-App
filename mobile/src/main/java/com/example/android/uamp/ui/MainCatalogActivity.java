@@ -1,18 +1,4 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 package com.example.android.uamp.ui;
 
 import android.app.ActivityOptions;
@@ -27,6 +13,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -66,6 +53,7 @@ import java.net.CookiePolicy;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -82,10 +70,15 @@ import javax.xml.xpath.XPathFactory;
  * are in the navigation drawer.
  */
 public class MainCatalogActivity extends ActionBarCastActivity {
+    ListView lv;
+    Parcelable state = null;
     //private Context context = null;
     private static final String TAG = LogHelper.makeLogTag(MainCatalogActivity.class);
     public String searchresults = "a";
     List<String> CatalogArray = new ArrayList<String>();
+    List<String> AuthorArray = new ArrayList<String>();
+    List<String> FormatArray = new ArrayList<String>();
+    List<String> PicturesArray = new ArrayList<String>();
     List<String> urlArray = new ArrayList<String>();
     ListView listview;
     ArrayAdapter adapter;
@@ -148,8 +141,12 @@ public class MainCatalogActivity extends ActionBarCastActivity {
         }
         else{
             CatalogArray.clear();
+            AuthorArray.clear();
+            FormatArray.clear();
+            PicturesArray.clear();
             searchPage = 1;
             searchresults = tempsearchresults;
+            state = null;
         }
 
 
@@ -240,14 +237,7 @@ public class MainCatalogActivity extends ActionBarCastActivity {
 
         @Override
         protected void onPreExecute() {
-            /*
-            ClipboardManager myClipboard;
-            myClipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-            ClipData cp = myClipboard.getPrimaryClip();
-            ClipData.Item item = cp.getItemAt(0);
 
-            catalogSearchText = item.getText().toString();
-            */
             super.onPreExecute();
             // Create a progressdialog
             mProgressDialog = new ProgressDialog(MainCatalogActivity.this);
@@ -275,7 +265,14 @@ public class MainCatalogActivity extends ActionBarCastActivity {
         @Override
         protected void onPostExecute(Void args) {
 
-            ListView lv = (ListView) findViewById(R.id.cataloglist);
+            CatalogListAdapter adapter = new CatalogListAdapter(MainCatalogActivity.this, R.layout.cataloglist_item, CatalogArray, AuthorArray, FormatArray, PicturesArray);
+            lv = (ListView)findViewById(R.id.cataloglist);
+            lv.setAdapter(adapter);
+            if(state != null){
+                lv.onRestoreInstanceState(state);
+            }
+
+
 
             if(CatalogArray.size() != 0) {
                 View footerView = ((LayoutInflater) MainCatalogActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.footer, null, false);
@@ -283,6 +280,7 @@ public class MainCatalogActivity extends ActionBarCastActivity {
                 Button forward = (Button) footerView.findViewById(R.id.loadMore);
                 forward.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
+                        state = lv.onSaveInstanceState();
                         Bundle extras = ActivityOptions.makeCustomAnimation(
                                 MainCatalogActivity.this, R.anim.fade_in, R.anim.fade_out).toBundle();
                         Intent searchIntent = new Intent(MainCatalogActivity.this, MainCatalogActivity.class);
@@ -293,7 +291,6 @@ public class MainCatalogActivity extends ActionBarCastActivity {
                 });
             }
 
-            lv.setAdapter(new ArrayAdapter<String>(MainCatalogActivity.this, R.layout.cataloglist_item, R.id.catalog_name, CatalogArray));
 
 
 
@@ -443,21 +440,28 @@ public class MainCatalogActivity extends ActionBarCastActivity {
 
         XPathFactory xpathFactory = XPathFactory.newInstance();
         XPath xpath = xpathFactory.newXPath();
-        // NodeList nodeList = (NodeList)xpath.compile("//span[@class='nsm-short-item nsm-e134']").evaluate(document, XPathConstants.NODESET);
-        NodeList nodeList = (NodeList)xpath.evaluate("//span[@class='nsm-short-item nsm-e135']", document, XPathConstants.NODESET);
-
-        String[] results = new String[nodeList.getLength()];
-        for (int index = 0; index < nodeList.getLength(); index++) {
-            Node node = nodeList.item(index);
-            String name = xpath.evaluate(".",node);
-            results[index] = name;
-            CatalogArray.add(name);
-
+        Node testNode1 = (Node)xpath.evaluate("//table[@width = '100%']/tbody", document, XPathConstants.NODE);
+        NodeList testNode = (NodeList)xpath.evaluate("./tr", testNode1, XPathConstants.NODESET);
+        for (int index = 0; index < testNode.getLength(); index++) {
+            Node anode = testNode.item(index);
+            Node subNode = (Node)xpath.evaluate(".//span[@class='nsm-short-item nsm-e135']", anode, XPathConstants.NODE);
+            String testName = xpath.evaluate(".", subNode);
+            if(testName != "") {
+                CatalogArray.add(testName);
+                subNode = (Node)xpath.evaluate(".//span[@class='nsm-short-item nsm-e118']", anode, XPathConstants.NODE);
+                String testAuth = xpath.evaluate(".",subNode);
+                AuthorArray.add(testAuth);
+                subNode = (Node)xpath.evaluate(".//span[@class='nsm-short-item nsm-e249']", anode, XPathConstants.NODE);
+                String testForm = xpath.evaluate(".",subNode);
+                FormatArray.add(testForm);
+                subNode = (Node)xpath.evaluate(".//img[@class='thumbnail']/@src", anode, XPathConstants.NODE);
+                String testPic = xpath.evaluate(".",subNode);
+                if(testPic == ""){
+                    testPic= "/";
+                }
+                PicturesArray.add(testPic);
+            }
         }
-        //String msg
-
-        System.out.println("msg= + ;");
-
 
     }
 
