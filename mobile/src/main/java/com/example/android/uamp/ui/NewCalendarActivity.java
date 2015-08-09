@@ -7,6 +7,7 @@ import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -33,6 +34,8 @@ import android.widget.Toast;
 import com.example.android.uamp.R;
 import com.example.android.uamp.utils.LogHelper;
 
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.message.BasicNameValuePair;
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.TagNode;
@@ -45,6 +48,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.CookieHandler;
@@ -253,7 +257,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                doBookSearch();
+                doCalSearch();
             }
             catch(Exception e){
                 LogHelper.e(TAG,e,"Things be wacky");
@@ -320,14 +324,13 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         }
     }
 
-    public void doBookSearch() throws Exception {
+    public void doCalSearch() throws Exception {
         String Qurl = "http://cat.cmclibrary.org/polaris/search/searchresults.aspx?ctx=1.1033.0.0.3&type=Keyword&term=";
         //String bookSort = "&limit=TOM=bks";
         if (searchresults == ""){
             searchresults = "b";
         }
-        String url1 = "http://cat.cmclibrary.org/polaris/search/components/ajaxResults.aspx?page=";
-        url1 += String.valueOf(searchPage);
+        String url1 = "http://events.cmclibrary.org/eventcalendar.asp";
         String url = Qurl + URLEncoder.encode(searchresults, "UTF-8");
         //url += bookSort;
 
@@ -385,22 +388,53 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         HttpURLConnection.setFollowRedirects(true);
 
         //Make a connection to get cookies
-        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+        HttpURLConnection con = (HttpURLConnection) obj1.openConnection();
         con.setRequestMethod("GET");
         con.setRequestProperty("User-Agent", USER_AGENT);
         Map<String, List<String>> headerFields = con.getHeaderFields();
 
         //Open the real connection
-        HttpURLConnection con1 = (HttpURLConnection) obj.openConnection();
+        HttpURLConnection con1 = (HttpURLConnection) obj1.openConnection();
         con1.setRequestProperty("CSP", "active");
         con1.setRequestProperty("Accept", "*/*");
-        con1.setRequestProperty("Content-Type", "text/plain; charset=utf-8");
-        con1.setRequestMethod("GET");
-        int responseCode = con1.getResponseCode();
+        con1.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
+
+        con1.setUseCaches(false);
+        con1.setDoInput(true);
+        con1.setDoOutput(true);
+        con1.setChunkedStreamingMode(0);
+        String urlParameters1 =
+                "DispType=" + URLEncoder.encode("list", "UTF-8") +
+                        "&dt=" + URLEncoder.encode("range", "UTF-8")+
+                        "&ds=" + URLEncoder.encode("2015-12-1", "UTF-8")+
+                        "&de=" + URLEncoder.encode("2015-12-2", "UTF-8");
+        //String newUrlParams = "plink_public_url=&plink_public_dyn_url=&plink_staff_url=&rsslink_public_dyn_url=&rsslink_staff_url=&saved_year=2015&weekstart=12%2F1%2F2015&view_date=&viewIndividualDate=&LangType=0&pageTracker=&perPageDispTracker=&WindowMode=&noheader=&lad=&transfer=&SearchState=&OngoingState=&PageTitleStr=&keyword=&DispType=list&CURDATE_month=December&CURDATE_YEAR=2015&dt=range&ds=2015-12-1&de=2015-12-2&sd=&Lib=0&AllTypes=ALL&EventType=Arts+and+Crafts+Program&EventType=Author+Visit&EventType=Book+Club&EventType=Book+Sale&EventType=Bookmobile&EventType=Computer+Class&EventType=Education+Program&EventType=Food%2FCookery+Program&EventType=Gaming+Events&EventType=Garden+Program&EventType=Health%2FExercise+Program&EventType=Holiday&EventType=Maker+Program&EventType=Movie+Nights&EventType=Music+Program&EventType=Natural+History+Program&EventType=Organization+Meeting&EventType=Other&EventType=Storytime&EventType=Summer+Reading&EventType=Workshops&AllAgeGroups=ALL&AgeGroup=Family&AgeGroup=Teen&AgeGroup=Children&AgeGroup=Adult&SaveDispType=week&TotalEvents=21&TotalAgeGroups=4&TotalLibs=9&SavePointer=&returnToSearch=&CalNum=0&ad=&direction=&nopw=&qurl=";
+
+        String urlParameters2 =
+                "DispType=" + URLEncoder.encode("list", "UTF-8") +
+                        "&date_type=" + URLEncoder.encode("range", "UTF-8")+
+                        "&dr1Month=" + URLEncoder.encode("12", "UTF-8")+
+                        "&dr1Day=" + URLEncoder.encode("1", "UTF-8")+
+                        "&dr1Year=" + URLEncoder.encode("2015", "UTF-8")+
+                        "&dr2Month=" + URLEncoder.encode("12", "UTF-8")+
+                        "&dr2Day=" + URLEncoder.encode("31", "UTF-8")+
+                        "&dr2Year=" + URLEncoder.encode("2015", "UTF-8");
+
+        con1.setRequestMethod("POST");
+
+        //Send request
+        DataOutputStream wr = new DataOutputStream (
+                con1.getOutputStream ());
+        wr.writeBytes(urlParameters2);
+        wr.flush();
+        wr.close();
+
+
+        //int responseCode = con1.getResponseCode();
 
         //Now get the search results
-        con1 = (HttpURLConnection) obj1.openConnection();
-        responseCode = con1.getResponseCode();
+        //con1 = (HttpURLConnection) obj1.openConnection();
+        //responseCode = con1.getResponseCode();
         BufferedReader in1 = new BufferedReader(
                 new InputStreamReader(con1.getInputStream()));
         String inputLine1;
@@ -440,22 +474,27 @@ public class NewCalendarActivity extends ActionBarCastActivity {
 
         XPathFactory xpathFactory = XPathFactory.newInstance();
         XPath xpath = xpathFactory.newXPath();
-        Node testNode1 = (Node)xpath.evaluate("//table[@width = '100%']/tbody", document, XPathConstants.NODE);
-        NodeList testNode = (NodeList)xpath.evaluate("./tr", testNode1, XPathConstants.NODESET);
+        Node testNode1 = (Node)xpath.evaluate("//div[@id = 'divBody']", document, XPathConstants.NODE);
+        NodeList testNode = (NodeList)xpath.evaluate(".//table[@class = 'event']/tbody/tr[2]", testNode1, XPathConstants.NODESET);
         for (int index = 0; index < testNode.getLength(); index++) {
             Node anode = testNode.item(index);
-            Node subNode = (Node)xpath.evaluate(".//span[@class='nsm-short-item nsm-e135']", anode, XPathConstants.NODE);
+            //Node tNode = (Node)xpath.evaluate(".//td[@class = 'event_values']", anode, XPathConstants.NODE);
+            Node subNode = (Node)xpath.evaluate(".//span[@class='event_title_list_special_class']", anode, XPathConstants.NODE);
             String testName = xpath.evaluate(".", subNode);
             if(testName != "") {
                 CatalogArray.add(testName);
-                subNode = (Node)xpath.evaluate(".//span[@class='nsm-short-item nsm-e118']", anode, XPathConstants.NODE);
+                subNode = (Node)xpath.evaluate(".//span[@class='event_title_list_special_class']", anode, XPathConstants.NODE);
                 String testAuth = xpath.evaluate(".",subNode);
                 AuthorArray.add(testAuth);
-                subNode = (Node)xpath.evaluate(".//span[@class='nsm-short-item nsm-e249']", anode, XPathConstants.NODE);
+                subNode = (Node)xpath.evaluate(".//text()", anode, XPathConstants.NODE);
                 String testForm = xpath.evaluate(".",subNode);
                 FormatArray.add(testForm);
-                subNode = (Node)xpath.evaluate(".//img[@class='thumbnail']/@src", anode, XPathConstants.NODE);
-                String testPic = xpath.evaluate(".",subNode);
+                String testPic = "";
+                if((subNode = (Node)xpath.evaluate(".//img", anode, XPathConstants.NODE)) != null){
+                    testPic = "http://events.cmclibrary.org/"+ xpath.evaluate("./@src",subNode);
+
+
+                }
                 if(testPic == ""){
                     testPic= "/";
                 }
