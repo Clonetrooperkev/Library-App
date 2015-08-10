@@ -17,7 +17,6 @@ package com.example.android.uamp.ui;
 
 import android.content.Context;
 
-import com.example.android.uamp.ui.MainCalendarActivity;
 import com.example.android.uamp.R;
 
 import java.util.ArrayList;

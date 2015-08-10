@@ -74,4 +74,7 @@
     <string name="search_hint">Type and Search</string>
     <string name="menu_search">Search</string>
     <string name="footer_text_1">More...</string>
+    <string name="range_start">Start Date</string>
+    <string name="range_end">End Date</string>
+    <string name="date_range">Date Range</string>
 </resources>
