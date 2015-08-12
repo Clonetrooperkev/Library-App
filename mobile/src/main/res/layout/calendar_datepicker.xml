@@ -1,0 +1,35 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/datepicker_start_title"
+        android:textColor="@color/drawer_item_tint_color"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/datepicker_start"
+        android:layout_gravity="center_vertical"/>
+    <DatePicker
+        android:id="@+id/dpStartDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:datePickerMode="spinner"
+        android:calendarViewShown="false" />
+    <TextView
+        android:id="@+id/datepicker_end_title"
+        android:textColor="@color/drawer_item_tint_color"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/datepicker_end"
+        android:layout_gravity="center_vertical"/>
+    <DatePicker
+        android:id="@+id/dpEndDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:datePickerMode="spinner"
+        android:calendarViewShown="false" />
+
+</LinearLayout>

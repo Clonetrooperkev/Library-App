@@ -12,16 +12,6 @@
         android:orderInCategory="1"
         app:showAsAction="never"
         android:title="@string/date_range">
-        <menu>
-            <group android:checkableBehavior="none">
-                <item android:id="@+id/range_start"
-                    android:orderInCategory="31"
-                    android:title="@string/range_start" />
-                <item android:id="@+id/range_end"
-                    android:orderInCategory="32"
-                    android:title="@string/range_end" />
-            </group>
-        </menu>
     </item>
 
 

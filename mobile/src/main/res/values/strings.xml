@@ -77,4 +77,6 @@
     <string name="range_start">Start Date</string>
     <string name="range_end">End Date</string>
     <string name="date_range">Date Range</string>
+    <string name="datepicker_start">Start Date</string>
+    <string name="datepicker_end">End Date</string>
 </resources>

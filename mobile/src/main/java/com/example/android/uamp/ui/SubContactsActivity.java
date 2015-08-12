@@ -15,6 +15,7 @@
  */
 package com.example.android.uamp.ui;
 
+import android.app.ActionBar;
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -23,6 +24,7 @@ import android.content.ClipboardManager;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -95,6 +97,7 @@ public class SubContactsActivity extends ActionBarCastActivity {
                 subContactCategory= extras.getString("SUBCONTACTKEY");
             }
         }
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         new DownloadJSON().execute();
 
     }

@@ -1,10 +1,12 @@
 
 package com.example.android.uamp.ui;
 import android.app.ActivityOptions;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -158,6 +160,10 @@ public class NewCalendarActivity extends ActionBarCastActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if( (item.getTitle().equals("Date Range"))) {
+            showDatePicker();
+        }
+        /*
         if( (item.getTitle().equals("Start Date"))) {
             final Calendar c = Calendar.getInstance();
             final Calendar mc = Calendar.getInstance();
@@ -216,8 +222,43 @@ public class NewCalendarActivity extends ActionBarCastActivity {
             dpd.show();
 
         }
-
+*/
         return super.onOptionsItemSelected(item);
+    }
+
+    public void showDatePicker() {
+        // Inflate your custom layout containing 2 DatePickers
+        LayoutInflater inflater = (LayoutInflater) getLayoutInflater();
+        View customView = inflater.inflate(R.layout.calendar_datepicker, null);
+
+        // Define your date pickers
+        final DatePicker dpStartDate = (DatePicker) customView.findViewById(R.id.dpStartDate);
+        final DatePicker dpEndDate = (DatePicker) customView.findViewById(R.id.dpEndDate);
+
+        // Build the dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(customView); // Set the view of the dialog to your custom layout
+        //builder.setTitle("Select start and end date");
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                startYear = dpStartDate.getYear();
+                startMonth = dpStartDate.getMonth() + 1;
+                startDay = dpStartDate.getDayOfMonth();
+                endYear = dpEndDate.getYear();
+                endMonth = dpEndDate.getMonth() + 1;
+                endDay = dpEndDate.getDayOfMonth();
+                dialog.dismiss();
+                Bundle extras = ActivityOptions.makeCustomAnimation(
+                        NewCalendarActivity.this, R.anim.fade_in, R.anim.fade_out).toBundle();
+                Intent searchIntent = new Intent(NewCalendarActivity.this, NewCalendarActivity.class);
+                searchIntent.putExtra("SEARCHVALUE", "");
+                searchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(searchIntent, extras);
+            }});
+
+        // Create and show the dialog
+        builder.create().show();
     }
 
     @Override
@@ -372,23 +413,26 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         HttpURLConnection.setFollowRedirects(true);
 
         //Make a connection to get cookies
-        HttpURLConnection con = (HttpURLConnection) obj1.openConnection();
-        con.setRequestMethod("GET");
-        con.setRequestProperty("User-Agent", USER_AGENT);
-        Map<String, List<String>> headerFields = con.getHeaderFields();
+        if(searchPage == 1){
+            HttpURLConnection con = (HttpURLConnection) obj1.openConnection();
+            con.setRequestMethod("GET");
+            con.setRequestProperty("User-Agent", USER_AGENT);
+            Map<String, List<String>> headerFields = con.getHeaderFields();
+
+        }
 
         //Open the real connection
         HttpURLConnection con1 = (HttpURLConnection) obj1.openConnection();
         con1.setRequestProperty("CSP", "active");
         con1.setRequestProperty("Accept", "*/*");
         con1.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
-
         con1.setUseCaches(false);
         con1.setDoInput(true);
         con1.setDoOutput(true);
         con1.setChunkedStreamingMode(0);
-        String urlParameters2 =
+        String urlParameters1 =
                 "DispType=" + URLEncoder.encode("list", "UTF-8") +
+                        //"perPageDispTracker=" +URLEncoder.encode("25", "UTF-8")+
                         "&date_type=" + URLEncoder.encode("range", "UTF-8")+
                         "&dr1Month=" + URLEncoder.encode(Integer.toString(startMonth), "UTF-8")+
                         "&dr1Day=" + URLEncoder.encode(Integer.toString(startDay), "UTF-8")+
@@ -397,12 +441,29 @@ public class NewCalendarActivity extends ActionBarCastActivity {
                         "&dr2Day=" + URLEncoder.encode(Integer.toString(endDay), "UTF-8")+
                         "&dr2Year=" + URLEncoder.encode(Integer.toString(endYear), "UTF-8");
 
+        String urlParameters2 =
+                "DispType=" + URLEncoder.encode("list", "UTF-8") +
+                "&pageTracker=" + URLEncoder.encode(Integer.toString(searchPage), "UTF-8") +
+                "&SaveDispType=" +URLEncoder.encode("list", "UTF-8") +
+                "&perPageDispTracker=" +URLEncoder.encode("25", "UTF-8")+
+                "&dt=" +URLEncoder.encode("range", "UTF-8")+
+                "&ds=" +URLEncoder.encode(Integer.toString(startYear)+"-"+Integer.toString(startMonth)+"-"+Integer.toString(startDay), "UTF-8")+
+                "&de=" +URLEncoder.encode(Integer.toString(endYear)+"-"+Integer.toString(endMonth)+"-"+Integer.toString(endDay), "UTF-8");
+
+
+
         con1.setRequestMethod("POST");
 
         //Send request
         DataOutputStream wr = new DataOutputStream (
                 con1.getOutputStream ());
-        wr.writeBytes(urlParameters2);
+        if(searchPage == 1) {
+            wr.writeBytes(urlParameters1);
+        }
+        else{
+            wr.writeBytes(urlParameters2);
+
+        }
         wr.flush();
         wr.close();
 
