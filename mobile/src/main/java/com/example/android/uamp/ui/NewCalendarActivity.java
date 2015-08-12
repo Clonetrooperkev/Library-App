@@ -68,12 +68,12 @@ public class NewCalendarActivity extends ActionBarCastActivity {
     EditText txtDate;
     ListView lv;
     Parcelable state = null;
-    public int startDay = 1;
-    public int startMonth = 12;
-    public int startYear = 2015;
-    public int endDay = 2;
-    public int endMonth = 12;
-    public int endYear = 2015;
+    public int startDay = 0;
+    public int startMonth = 0;
+    public int startYear = 0;
+    public int endDay = 0;
+    public int endMonth = 0;
+    public int endYear = 0;
     //private Context context = null;
     private static final String TAG = LogHelper.makeLogTag(MainCatalogActivity.class);
     public String searchresults = "a";
@@ -106,6 +106,15 @@ public class NewCalendarActivity extends ActionBarCastActivity {
     int searchPage;
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        final Calendar currentCal = Calendar.getInstance();
+        endYear = (startYear = currentCal.get(Calendar.YEAR));
+        endMonth = (startMonth = currentCal.get(Calendar.MONTH)+1)+1;
+        endDay = (startDay = currentCal.get(Calendar.DAY_OF_MONTH));
+        if(endMonth == 13){
+            endMonth = 1;
+            endYear += 1;
+        }
+
         catalogUnavailableError = false;
         LogHelper.w(TAG, "Testing Joe");
         super.onCreate(savedInstanceState);
@@ -234,7 +243,8 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         // Define your date pickers
         final DatePicker dpStartDate = (DatePicker) customView.findViewById(R.id.dpStartDate);
         final DatePicker dpEndDate = (DatePicker) customView.findViewById(R.id.dpEndDate);
-
+        dpStartDate.updateDate(startYear,startMonth-1,startDay);
+        dpEndDate.updateDate(endYear,endMonth-1,endDay);
         // Build the dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(customView); // Set the view of the dialog to your custom layout
@@ -439,7 +449,8 @@ public class NewCalendarActivity extends ActionBarCastActivity {
                         "&dr1Year=" + URLEncoder.encode(Integer.toString(startYear), "UTF-8")+
                         "&dr2Month=" + URLEncoder.encode(Integer.toString(endMonth), "UTF-8")+
                         "&dr2Day=" + URLEncoder.encode(Integer.toString(endDay), "UTF-8")+
-                        "&dr2Year=" + URLEncoder.encode(Integer.toString(endYear), "UTF-8");
+                        "&dr2Year=" + URLEncoder.encode(Integer.toString(endYear), "UTF-8")+
+                        "&keyword=" + URLEncoder.encode(searchresults, "UTF-8");
 
         String urlParameters2 =
                 "DispType=" + URLEncoder.encode("list", "UTF-8") +
@@ -448,7 +459,8 @@ public class NewCalendarActivity extends ActionBarCastActivity {
                 "&perPageDispTracker=" +URLEncoder.encode("25", "UTF-8")+
                 "&dt=" +URLEncoder.encode("range", "UTF-8")+
                 "&ds=" +URLEncoder.encode(Integer.toString(startYear)+"-"+Integer.toString(startMonth)+"-"+Integer.toString(startDay), "UTF-8")+
-                "&de=" +URLEncoder.encode(Integer.toString(endYear)+"-"+Integer.toString(endMonth)+"-"+Integer.toString(endDay), "UTF-8");
+                "&de=" +URLEncoder.encode(Integer.toString(endYear)+"-"+Integer.toString(endMonth)+"-"+Integer.toString(endDay), "UTF-8")+
+                "&keyword=" + URLEncoder.encode(searchresults, "UTF-8");
 
 
 
