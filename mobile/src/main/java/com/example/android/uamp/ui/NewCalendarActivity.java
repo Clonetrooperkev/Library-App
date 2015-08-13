@@ -169,7 +169,6 @@ public class NewCalendarActivity extends ActionBarCastActivity {
                 searchPage = 1;
                 searchresults = tempsearchresults;
                 state = null;
-                detailsURL = "";
             }
 
         }
@@ -242,7 +241,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         builder.create().show();
     }
 
-    public void showDialog() {
+    public void showDetails() {
         // Inflate your custom layout containing 2 DatePickers
         LayoutInflater inflater = (LayoutInflater) getLayoutInflater();
         View customView = inflater.inflate(R.layout.calendar_details, null);
@@ -256,7 +255,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
                 detailsURL = "";
-                
+
             }
         });
 
@@ -349,7 +348,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
             }
 
             if(!detailsURL.equals("")) {
-                showDialog();
+                showDetails();
             }
             if (CalendarNameArray.size() != 0) {
                 View footerView = ((LayoutInflater) NewCalendarActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.footer, null, false);

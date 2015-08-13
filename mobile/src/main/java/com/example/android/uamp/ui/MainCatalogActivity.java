@@ -8,6 +8,7 @@ import android.app.SearchManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -70,11 +71,14 @@ import javax.xml.xpath.XPathFactory;
  * are in the navigation drawer.
  */
 public class MainCatalogActivity extends ActionBarCastActivity {
+    String detailsURL = "";
+    String detailsName;
     ListView lv;
     Parcelable state = null;
     //private Context context = null;
     private static final String TAG = LogHelper.makeLogTag(MainCatalogActivity.class);
     public String searchresults = "a";
+    List<String> CatalogDetailsURLArray = new ArrayList<String>();
     List<String> CatalogArray = new ArrayList<String>();
     List<String> AuthorArray = new ArrayList<String>();
     List<String> FormatArray = new ArrayList<String>();
@@ -104,6 +108,7 @@ public class MainCatalogActivity extends ActionBarCastActivity {
     int searchPage;
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        detailsURL = "";
         catalogUnavailableError = false;
         LogHelper.w(TAG, "Testing Joe");
         super.onCreate(savedInstanceState);
@@ -135,6 +140,9 @@ public class MainCatalogActivity extends ActionBarCastActivity {
             if(extras.containsKey("MOREBUTTON")){
                 moreButton= extras.getString("MOREBUTTON");
             }
+            if(extras.containsKey("DETAILS")){
+                detailsURL = CatalogDetailsURLArray.get(extras.getInt("DETAILS"));
+            }
 
         }
         if(moreButton.equals("true")){
@@ -142,13 +150,16 @@ public class MainCatalogActivity extends ActionBarCastActivity {
 
         }
         else{
-            CatalogArray.clear();
-            AuthorArray.clear();
-            FormatArray.clear();
-            PicturesArray.clear();
-            searchPage = 1;
-            searchresults = tempsearchresults;
-            state = null;
+            if(detailsURL.equals("")){
+                CatalogArray.clear();
+                AuthorArray.clear();
+                FormatArray.clear();
+                PicturesArray.clear();
+                searchPage = 1;
+                searchresults = tempsearchresults;
+                state = null;
+            }
+
         }
 
 
@@ -256,7 +267,12 @@ public class MainCatalogActivity extends ActionBarCastActivity {
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                doBookSearch();
+                if(detailsURL.equals("")){
+                    doBookSearch();
+                }
+                else{
+                    doDetailSearch();
+                }
             }
             catch(Exception e){
                 LogHelper.e(TAG,e,"Things be wacky");
@@ -276,7 +292,9 @@ public class MainCatalogActivity extends ActionBarCastActivity {
             }
 
 
-
+            if(!detailsURL.equals("")) {
+                showDetails();
+            }
             if(CatalogArray.size() != 0) {
                 View footerView = ((LayoutInflater) MainCatalogActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.footer, null, false);
                 lv.addFooterView(footerView);
@@ -301,17 +319,14 @@ public class MainCatalogActivity extends ActionBarCastActivity {
 
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                    String catalogName = ((TextView) view.findViewById(R.id.catalog_name)).getText().toString();
-
-                    Toast.makeText(getApplicationContext(), catalogName, Toast.LENGTH_SHORT).show();
                     if (position >= 0) {
+                        state = lv.onSaveInstanceState();
                         Bundle extras = ActivityOptions.makeCustomAnimation(
                                 MainCatalogActivity.this, R.anim.fade_in, R.anim.fade_out).toBundle();
-
-                        Class activityClass = mDrawerMenuContents.getActivity(position);
-                        startActivity(new Intent(MainCatalogActivity.this, activityClass), extras);
-                        finish();
+                        Intent searchIntent = new Intent(MainCatalogActivity.this, MainCatalogActivity.class);
+                        searchIntent.putExtra("DETAILS", position);
+                        searchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(searchIntent, extras);
                     }
 
                 }
@@ -322,7 +337,28 @@ public class MainCatalogActivity extends ActionBarCastActivity {
             mProgressDialog.dismiss();
         }
     }
+    public void showDetails() {
+        // Inflate your custom layout containing 2 DatePickers
+        LayoutInflater inflater = (LayoutInflater) getLayoutInflater();
+        View customView = inflater.inflate(R.layout.catalog_details, null);
 
+        // Build the dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(customView); // Set the view of the dialog to your custom layout
+        //builder.setTitle("Select start and end date");
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                detailsURL = "";
+
+            }
+        });
+
+        // Create and show the dialog
+        builder.setMessage(detailsName);
+        builder.create().show();
+    }
     public void doBookSearch() throws Exception {
         String Qurl = "http://cat.cmclibrary.org/polaris/search/searchresults.aspx?ctx=1.1033.0.0.3&type=Keyword&term=";
         //String bookSort = "&limit=TOM=bks";
@@ -457,6 +493,9 @@ public class MainCatalogActivity extends ActionBarCastActivity {
                 subNode = (Node)xpath.evaluate(".//span[@class='nsm-short-item nsm-e249']", anode, XPathConstants.NODE);
                 String testForm = xpath.evaluate(".",subNode);
                 FormatArray.add(testForm);
+                subNode = (Node) xpath.evaluate(".//a[@class='nsm-brief-action-link']/@href", anode, XPathConstants.NODE);
+                String testURL = xpath.evaluate(".", subNode);
+                CatalogDetailsURLArray.add(testURL);
                 subNode = (Node)xpath.evaluate(".//img[@class='thumbnail']/@src", anode, XPathConstants.NODE);
                 String testPic = xpath.evaluate(".",subNode);
                 if(testPic == ""){
@@ -466,6 +505,55 @@ public class MainCatalogActivity extends ActionBarCastActivity {
             }
         }
 
+    }
+    public void doDetailSearch() throws Exception {
+        String USER_AGENT = "Chrome/43.0.2357.134";
+        URL obj1 = new URL(detailsURL);
+        HttpURLConnection.setFollowRedirects(true);
+
+        //Open the real connection
+        HttpURLConnection con1 = (HttpURLConnection) obj1.openConnection();
+        con1.setRequestProperty("CSP", "active");
+        con1.setRequestProperty("Accept", "*/*");
+        con1.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
+        con1.setUseCaches(false);
+        con1.setDoInput(true);
+        con1.setChunkedStreamingMode(0);
+
+        con1.setRequestMethod("GET");
+        int responseCode = con1.getResponseCode();
+        BufferedReader in1 = new BufferedReader(
+                new InputStreamReader(con1.getInputStream()));
+        String inputLine1;
+        StringBuffer response1 = new StringBuffer();
+
+        while ((inputLine1 = in1.readLine()) != null) {
+            response1.append(inputLine1);
+        }
+        in1.close();
+        String str = response1.toString();
+
+        HtmlCleaner cleaner = new HtmlCleaner();
+        CleanerProperties props = cleaner.getProperties();
+        props.setAllowHtmlInsideAttributes(true);
+        props.setAllowMultiWordAttributes(true);
+        props.setRecognizeUnicodeChars(true);
+        props.setOmitComments(false);
+
+        //HTML page root node
+        TagNode root = cleaner.clean(str);
+        cleaner.getInnerHtml(root);
+
+        String html = "<" + root.getName() + ">" + cleaner.getInnerHtml(root) + "</" + root.getName() + ">";
+        InputSource source = new InputSource(new StringReader(html));
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        Document document = db.parse(source);
+
+        XPathFactory xpathFactory = XPathFactory.newInstance();
+        XPath xpath = xpathFactory.newXPath();
+        Node testNode1 = (Node) xpath.evaluate("//div[@class='nsm-long-item nsm-e35']", document, XPathConstants.NODE);
+        detailsName = xpath.evaluate(".", testNode1);
     }
 
 }
