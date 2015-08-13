@@ -107,6 +107,8 @@ public class MainCatalogActivity extends ActionBarCastActivity {
         catalogUnavailableError = false;
         LogHelper.w(TAG, "Testing Joe");
         super.onCreate(savedInstanceState);
+
+        //Every time catalog is entered: set "search by" and "format" to "any"
         SharedPreferences settings = getSharedPreferences("settings", 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.clear();
@@ -198,6 +200,7 @@ public class MainCatalogActivity extends ActionBarCastActivity {
         searchby_author_MenuItem = submenu.findItem(R.id.searchby_author);
         searchby_ISBN_MenuItem = submenu.findItem(R.id.searchby_ISBN);
         searchby_title_MenuItem = submenu.findItem(R.id.searchby_title);
+
         MenuItem formatSearch = menu.findItem(R.id.menu_format);
         SubMenu subformatmenu = formatSearch.getSubMenu();
         format_any_MenuItem = subformatmenu.findItem(R.id.format_any);

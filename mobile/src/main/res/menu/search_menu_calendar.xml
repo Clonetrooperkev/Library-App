@@ -13,7 +13,45 @@
         app:showAsAction="never"
         android:title="@string/date_range">
     </item>
-
-
+    <item
+        android:id="@+id/menu_searchLib"
+        android:orderInCategory="1"
+        app:showAsAction="never"
+        android:title="@string/menu_library">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item android:id="@+id/menu_searchAllLib"
+                    android:orderInCategory="21"
+                    android:title="@string/search_byAll" />
+                <item android:id="@+id/menu_bookmobile"
+                    android:orderInCategory="21"
+                    android:title="@string/menu_bookmobile" />
+                <item android:id="@+id/menu_cape_may_city_library"
+                    android:orderInCategory="23"
+                    android:title="@string/menu_cape_may_city_library" />
+                <item android:id="@+id/menu_cape_may_courthouse_library"
+                    android:orderInCategory="22"
+                    android:title="@string/menu_cape_may_courthouse_library" />
+                <item android:id="@+id/menu_lower_cape_library"
+                    android:orderInCategory="24"
+                    android:title="@string/menu_lower_cape_library"/>
+                <item android:id="@+id/menu_sea_isle_city_library"
+                    android:orderInCategory="25"
+                    android:title="@string/menu_sea_isle_city_library" />
+                <item android:id="@+id/menu_stone_harbor_library"
+                    android:orderInCategory="26"
+                    android:title="@string/menu_stone_harbor_library" />
+                <item android:id="@+id/menu_upper_cape_library"
+                    android:orderInCategory="27"
+                    android:title="@string/menu_upper_cape_library" />
+                <item android:id="@+id/menu_wildwood_crest_library"
+                    android:orderInCategory="28"
+                    android:title="@string/menu_wildwood_crest_library"/>
+                <item android:id="@+id/menu_woodbine_library"
+                    android:orderInCategory="29"
+                    android:title="@string/menu_woodbine_library"/>
+            </group>
+        </menu>
+    </item>
 
 </menu>

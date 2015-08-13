@@ -61,11 +61,13 @@ import javax.xml.xpath.XPathFactory;
  * are in the navigation drawer.
  */
 public class NewCalendarActivity extends ActionBarCastActivity {
+    String detailsURL = "";
     private static final int DATE_DIALOG_ID = 1;
     public int year;
     public int month;
     public int day;
     EditText txtDate;
+    String detailsName;
     ListView lv;
     Parcelable state = null;
     public int startDay = 0;
@@ -78,6 +80,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
     private static final String TAG = LogHelper.makeLogTag(MainCatalogActivity.class);
     public String searchresults = "a";
     List<String> CalendarNameArray = new ArrayList<String>();
+    List<String> CalendarDetailsURLArray = new ArrayList<String>();
     List<String> LocationArray = new ArrayList<String>();
     List<String> DateArray = new ArrayList<String>();
     List<String> PicturesArray = new ArrayList<String>();
@@ -86,16 +89,16 @@ public class NewCalendarActivity extends ActionBarCastActivity {
     ArrayAdapter adapter;
     ProgressDialog mProgressDialog;
     boolean catalogUnavailableError;
-    MenuItem searchby_any_MenuItem;
-    MenuItem searchby_author_MenuItem;
-    MenuItem searchby_ISBN_MenuItem;
-    MenuItem searchby_title_MenuItem;
-    MenuItem format_any_MenuItem;
-    MenuItem format_book_MenuItem;
-    MenuItem format_large_print_MenuItem;
-    MenuItem format_audiobook_MenuItem;
-    MenuItem format_audio_ebook_MenuItem;
-    MenuItem format_ebook_MenuItem;
+    MenuItem search_byAll;
+    MenuItem menu_bookmobile;
+    MenuItem menu_cape_may_city_library;
+    MenuItem menu_cape_may_courthouse_library;
+    MenuItem menu_lower_cape_library;
+    MenuItem menu_sea_isle_city_library;
+    MenuItem menu_stone_harbor;
+    MenuItem menu_upper_cape_library;
+    MenuItem menu_wildwood_crest_library;
+    MenuItem menu_woodbine_library;
     MenuItem format_dvd_MenuItem;
     MenuItem format_Bray_disc_MenuItem;
     MenuItem format_videotape_MenuItem;
@@ -104,13 +107,15 @@ public class NewCalendarActivity extends ActionBarCastActivity {
     MenuItem format_serial_MenuItem;
     SearchView searchView;
     int searchPage;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        detailsURL = "";
         final Calendar currentCal = Calendar.getInstance();
         endYear = (startYear = currentCal.get(Calendar.YEAR));
-        endMonth = (startMonth = currentCal.get(Calendar.MONTH)+1)+1;
+        endMonth = (startMonth = currentCal.get(Calendar.MONTH) + 1) + 1;
         endDay = (startDay = currentCal.get(Calendar.DAY_OF_MONTH));
-        if(endMonth == 13){
+        if (endMonth == 13) {
             endMonth = 1;
             endYear += 1;
         }
@@ -118,6 +123,8 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         catalogUnavailableError = false;
         LogHelper.w(TAG, "Testing Joe");
         super.onCreate(savedInstanceState);
+
+        //Every time catalog is entered: set "searchbyAll" to "any"
         SharedPreferences settings = getSharedPreferences("settings", 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.clear();
@@ -125,6 +132,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         handleIntent(getIntent());
 
     }
+
     @Override
     protected void onNewIntent(Intent intent) {
         searchView.setFocusable(false);
@@ -137,101 +145,63 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         String moreButton = "";
         setContentView(R.layout.activity_calendar);
         Bundle extras = intent.getExtras();
-        if(extras != null) {
-            if(extras.containsKey("SEARCHVALUE")) {
-                tempsearchresults= extras.getString("SEARCHVALUE");
+        if (extras != null) {
+            if (extras.containsKey("SEARCHVALUE")) {
+                tempsearchresults = extras.getString("SEARCHVALUE");
             }
-            if(extras.containsKey("MOREBUTTON")){
-                moreButton= extras.getString("MOREBUTTON");
+            if (extras.containsKey("MOREBUTTON")) {
+                moreButton = extras.getString("MOREBUTTON");
+            }
+            if(extras.containsKey("DETAILS")){
+                detailsURL = "http://events.cmclibrary.org/" + CalendarDetailsURLArray.get(extras.getInt("DETAILS"));
             }
 
         }
-        if(moreButton.equals("true")){
+        if (moreButton.equals("true")) {
             searchPage += 1;
 
-        }
-        else{
-            CalendarNameArray.clear();
-            LocationArray.clear();
-            DateArray.clear();
-            PicturesArray.clear();
-            searchPage = 1;
-            searchresults = tempsearchresults;
-            state = null;
+        } else {
+            if(detailsURL.equals("")){
+                CalendarNameArray.clear();
+                LocationArray.clear();
+                DateArray.clear();
+                PicturesArray.clear();
+                searchPage = 1;
+                searchresults = tempsearchresults;
+                state = null;
+                detailsURL = "";
+            }
+
         }
 
 
         initializeToolbar();
         setTitle("Calendar");
         //setContentView(R.layout.activity_placeholder);
-        new DownloadJSON().execute();
+        new fetchCalendarData().execute();
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if( (item.getTitle().equals("Date Range"))) {
+        if ((item.getItemId() == R.id.menu_range)) {
             showDatePicker();
         }
-        /*
-        if( (item.getTitle().equals("Start Date"))) {
-            final Calendar c = Calendar.getInstance();
-            final Calendar mc = Calendar.getInstance();
-            year = c.get(Calendar.YEAR);
-            month = c.get(Calendar.MONTH);
-            day = c.get(Calendar.DAY_OF_MONTH);
-
-            DatePickerDialog dpd = new DatePickerDialog(this,
-                    new DatePickerDialog.OnDateSetListener() {
-
-                        @Override
-                        public void onDateSet(DatePicker arg0, int arg1, int arg2, int arg3) {
-                            // TODO Auto-generated method stub
-                            startYear = arg1;
-                            startMonth = arg2+1;
-                            startDay = arg3;
-                            //showDate(arg1, arg2+1, arg3);
-                        }
-                    }, year, month, day);
-            mc.set(2015,12,30);
-            dpd.getDatePicker().setMinDate(c.getTimeInMillis());
-
-            dpd.getDatePicker().setMaxDate(mc.getTimeInMillis());
-            dpd.show();
-
+        if (item.isCheckable()) {
+            item.setChecked(!item.isChecked());
+            if(item.isChecked()){
+                SharedPreferences settings = getSharedPreferences("settings", 0);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putInt("Selected_Library", item.getItemId());
+                editor.commit();
+            }
+            Bundle extras = ActivityOptions.makeCustomAnimation(
+                    NewCalendarActivity.this, R.anim.fade_in, R.anim.fade_out).toBundle();
+            Intent searchIntent = new Intent(NewCalendarActivity.this, NewCalendarActivity.class);
+            searchIntent.putExtra("SEARCHVALUE", "");
+            searchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(searchIntent, extras);
+            return true;
         }
-        if( (item.getTitle().equals("End Date")) ) {
-            final Calendar c = Calendar.getInstance();
-            final Calendar mc = Calendar.getInstance();
-            year = c.get(Calendar.YEAR);
-            month = c.get(Calendar.MONTH);
-            day = c.get(Calendar.DAY_OF_MONTH);
-
-            DatePickerDialog dpd = new DatePickerDialog(this,
-                    new DatePickerDialog.OnDateSetListener() {
-
-                        @Override
-                        public void onDateSet(DatePicker arg0, int arg1, int arg2, int arg3) {
-                            // TODO Auto-generated method stub
-                            endYear = arg1;
-                            endMonth = arg2+1;
-                            endDay = arg3;
-                            //showDate(arg1, arg2+1, arg3);
-                            Bundle extras = ActivityOptions.makeCustomAnimation(
-                                    NewCalendarActivity.this, R.anim.fade_in, R.anim.fade_out).toBundle();
-                            Intent searchIntent = new Intent(NewCalendarActivity.this, NewCalendarActivity.class);
-                            searchIntent.putExtra("SEARCHVALUE", "");
-                            searchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(searchIntent, extras);
-                        }
-                    }, year, month, day);
-            mc.set(2015,12,30);
-            dpd.getDatePicker().setMinDate(c.getTimeInMillis());
-
-            dpd.getDatePicker().setMaxDate(mc.getTimeInMillis());
-            dpd.show();
-
-        }
-*/
         return super.onOptionsItemSelected(item);
     }
 
@@ -243,8 +213,8 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         // Define your date pickers
         final DatePicker dpStartDate = (DatePicker) customView.findViewById(R.id.dpStartDate);
         final DatePicker dpEndDate = (DatePicker) customView.findViewById(R.id.dpEndDate);
-        dpStartDate.updateDate(startYear,startMonth-1,startDay);
-        dpEndDate.updateDate(endYear,endMonth-1,endDay);
+        dpStartDate.updateDate(startYear, startMonth - 1, startDay);
+        dpEndDate.updateDate(endYear, endMonth - 1, endDay);
         // Build the dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(customView); // Set the view of the dialog to your custom layout
@@ -265,9 +235,33 @@ public class NewCalendarActivity extends ActionBarCastActivity {
                 searchIntent.putExtra("SEARCHVALUE", "");
                 searchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(searchIntent, extras);
-            }});
+            }
+        });
 
         // Create and show the dialog
+        builder.create().show();
+    }
+
+    public void showDialog() {
+        // Inflate your custom layout containing 2 DatePickers
+        LayoutInflater inflater = (LayoutInflater) getLayoutInflater();
+        View customView = inflater.inflate(R.layout.calendar_details, null);
+
+        // Build the dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(customView); // Set the view of the dialog to your custom layout
+        //builder.setTitle("Select start and end date");
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                detailsURL = "";
+                
+            }
+        });
+
+        // Create and show the dialog
+        builder.setMessage(detailsName);
         builder.create().show();
     }
 
@@ -284,50 +278,33 @@ public class NewCalendarActivity extends ActionBarCastActivity {
                 (SearchView) menu.findItem(R.id.menu_search).getActionView();
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
-/*
-        MenuItem searchbyMenu = menu.findItem(R.id.menu_searchby);
+
+        MenuItem searchbyMenu = menu.findItem(R.id.menu_searchLib);
         SubMenu submenu = searchbyMenu.getSubMenu();
-        searchby_any_MenuItem = submenu.findItem(R.id.searchby_any);
-        searchby_author_MenuItem = submenu.findItem(R.id.searchby_author);
-        searchby_ISBN_MenuItem = submenu.findItem(R.id.searchby_ISBN);
-        searchby_title_MenuItem = submenu.findItem(R.id.searchby_title);
-        MenuItem formatSearch = menu.findItem(R.id.menu_format);
-        SubMenu subformatmenu = formatSearch.getSubMenu();
-        format_any_MenuItem = subformatmenu.findItem(R.id.format_any);
-        format_book_MenuItem = subformatmenu.findItem(R.id.format_book);
-        format_large_print_MenuItem = subformatmenu.findItem(R.id.format_large_print);
-        format_audiobook_MenuItem = subformatmenu.findItem(R.id.format_audiobook);
-        format_audio_ebook_MenuItem = subformatmenu.findItem(R.id.format_audio_ebook);
-        format_ebook_MenuItem = subformatmenu.findItem(R.id.format_ebook);
-        format_dvd_MenuItem = subformatmenu.findItem(R.id.format_dvd);
-        format_Bray_disc_MenuItem = subformatmenu.findItem(R.id.format_Bray_disc);
-        format_videotape_MenuItem = subformatmenu.findItem(R.id.format_videotape);
-        format_music_cd_MenuItem = subformatmenu.findItem(R.id.format_music_cd);
-        format_sound_recording_MenuItem = subformatmenu.findItem(R.id.format_sound_recording);
-        format_serial_MenuItem = subformatmenu.findItem(R.id.format_serial);
+        search_byAll = submenu.findItem(R.id.menu_searchAllLib);
+        menu_bookmobile = submenu.findItem(R.id.menu_bookmobile);
+        menu_cape_may_city_library = submenu.findItem(R.id.menu_cape_may_city_library);
+        menu_cape_may_courthouse_library = submenu.findItem(R.id.menu_cape_may_courthouse_library);
+        menu_lower_cape_library = submenu.findItem(R.id.menu_lower_cape_library);
+        menu_sea_isle_city_library = submenu.findItem(R.id.menu_sea_isle_city_library);
+        menu_stone_harbor = submenu.findItem(R.id.menu_stone_harbor_library);
+        menu_upper_cape_library = submenu.findItem(R.id.menu_upper_cape_library);
+        menu_wildwood_crest_library = submenu.findItem(R.id.menu_wildwood_crest_library);
+        menu_woodbine_library = submenu.findItem(R.id.menu_woodbine_library);
         SharedPreferences settings = getSharedPreferences("settings", 0);
-        int CheckedItem = settings.getInt("SearchBy", 0);
-        if(CheckedItem != 0){
+        int CheckedItem = settings.getInt("Selected_Library", 0);
+        if (CheckedItem != 0) {
             searchByItem = menu.findItem(CheckedItem);
-        }
-        else{
-            searchByItem = searchby_any_MenuItem;
+        } else {
+            searchByItem = search_byAll;
         }
         searchByItem.setChecked(true);
-        CheckedItem = settings.getInt("Format", 0);
-        if(CheckedItem != 0){
-            searchByItem = menu.findItem(CheckedItem);
-        }
-        else{
-            searchByItem = format_any_MenuItem;
-        }
-        searchByItem.setChecked(true);
-*/
         return true;
 
     }
+
     // DownloadJSON AsyncTask
-    private class DownloadJSON extends AsyncTask<Void, Void, Void> {
+    private class fetchCalendarData extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected void onPreExecute() {
@@ -347,10 +324,15 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                doCalSearch();
-            }
-            catch(Exception e){
-                LogHelper.e(TAG,e,"Things be wacky");
+                if(detailsURL.equals("")){
+                    doCalSearch();
+                }
+                else{
+                    doDetailSearch();
+                }
+
+            } catch (Exception e) {
+                LogHelper.e(TAG, e, "Things be wacky");
             }
 
             return null;
@@ -360,15 +342,16 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         protected void onPostExecute(Void args) {
 
             CalendarListAdapter adapter = new CalendarListAdapter(NewCalendarActivity.this, R.layout.calendarlist_item, CalendarNameArray, LocationArray, DateArray, PicturesArray);
-            lv = (ListView)findViewById(R.id.calendarlist);
+            lv = (ListView) findViewById(R.id.calendarlist);
             lv.setAdapter(adapter);
-            if(state != null){
+            if (state != null) {
                 lv.onRestoreInstanceState(state);
             }
 
-
-
-            if(CalendarNameArray.size() != 0) {
+            if(!detailsURL.equals("")) {
+                showDialog();
+            }
+            if (CalendarNameArray.size() != 0) {
                 View footerView = ((LayoutInflater) NewCalendarActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.footer, null, false);
                 lv.addFooterView(footerView);
                 Button forward = (Button) footerView.findViewById(R.id.loadMore);
@@ -386,23 +369,18 @@ public class NewCalendarActivity extends ActionBarCastActivity {
             }
 
 
-
-
             lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                    String catalogName = ((TextView) view.findViewById(R.id.catalog_name)).getText().toString();
-
-                    Toast.makeText(getApplicationContext(), catalogName, Toast.LENGTH_SHORT).show();
                     if (position >= 0) {
+                        state = lv.onSaveInstanceState();
                         Bundle extras = ActivityOptions.makeCustomAnimation(
                                 NewCalendarActivity.this, R.anim.fade_in, R.anim.fade_out).toBundle();
-
-                        Class activityClass = mDrawerMenuContents.getActivity(position);
-                        startActivity(new Intent(NewCalendarActivity.this, activityClass), extras);
-                        finish();
+                        Intent searchIntent = new Intent(NewCalendarActivity.this, NewCalendarActivity.class);
+                        searchIntent.putExtra("DETAILS", position);
+                        searchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(searchIntent, extras);
                     }
 
                 }
@@ -423,7 +401,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         HttpURLConnection.setFollowRedirects(true);
 
         //Make a connection to get cookies
-        if(searchPage == 1){
+        if (searchPage == 1) {
             HttpURLConnection con = (HttpURLConnection) obj1.openConnection();
             con.setRequestMethod("GET");
             con.setRequestProperty("User-Agent", USER_AGENT);
@@ -440,45 +418,162 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         con1.setDoInput(true);
         con1.setDoOutput(true);
         con1.setChunkedStreamingMode(0);
-        String urlParameters1 =
-                "DispType=" + URLEncoder.encode("list", "UTF-8") +
-                        //"perPageDispTracker=" +URLEncoder.encode("25", "UTF-8")+
-                        "&date_type=" + URLEncoder.encode("range", "UTF-8")+
-                        "&dr1Month=" + URLEncoder.encode(Integer.toString(startMonth), "UTF-8")+
-                        "&dr1Day=" + URLEncoder.encode(Integer.toString(startDay), "UTF-8")+
-                        "&dr1Year=" + URLEncoder.encode(Integer.toString(startYear), "UTF-8")+
-                        "&dr2Month=" + URLEncoder.encode(Integer.toString(endMonth), "UTF-8")+
-                        "&dr2Day=" + URLEncoder.encode(Integer.toString(endDay), "UTF-8")+
-                        "&dr2Year=" + URLEncoder.encode(Integer.toString(endYear), "UTF-8")+
-                        "&keyword=" + URLEncoder.encode(searchresults, "UTF-8");
+        String searchbyString = "";
+        if(search_byAll.isChecked()){
+            searchbyString = "&AllLibs=" + URLEncoder.encode("ALL", "UTF-8")+
+                    "&Lib=" + URLEncoder.encode("0", "UTF-8")+
+                    "&Lib=" + URLEncoder.encode("1", "UTF-8")+
+                    "&Lib=" + URLEncoder.encode("2", "UTF-8")+
+                    "&Lib=" + URLEncoder.encode("3", "UTF-8")+
+                    "&Lib=" + URLEncoder.encode("4", "UTF-8")+
+                    "&Lib=" + URLEncoder.encode("4", "UTF-8")+
+                    "&Lib=" + URLEncoder.encode("5", "UTF-8")+
+                    "&Lib=" + URLEncoder.encode("6", "UTF-8")+
+                    "&Lib=" + URLEncoder.encode("7", "UTF-8")+
+                    "&Lib=" + URLEncoder.encode("8", "UTF-8");
+        }
+        else{
+            if(menu_cape_may_courthouse_library.isChecked()){
+                searchbyString = "&Lib=" + URLEncoder.encode("0", "UTF-8");
+            }
+            if(menu_cape_may_city_library.isChecked()){
+                searchbyString = "&Lib=" + URLEncoder.encode("1", "UTF-8");
+            }
+            if(menu_lower_cape_library.isChecked()){
+                searchbyString = "&Lib=" + URLEncoder.encode("2", "UTF-8");
+            }
+            if(menu_sea_isle_city_library.isChecked()){
+                searchbyString = "&Lib=" + URLEncoder.encode("3", "UTF-8");
+            }
+            if(menu_stone_harbor.isChecked()){
+                searchbyString = "&Lib=" + URLEncoder.encode("4", "UTF-8");
+            }
+            if(menu_upper_cape_library.isChecked()){
+                searchbyString = "&Lib=" + URLEncoder.encode("5", "UTF-8");
+            }
+            if(menu_wildwood_crest_library.isChecked()){
+                searchbyString = "&Lib=" + URLEncoder.encode("6", "UTF-8");
+            }
+            if(menu_woodbine_library.isChecked()){
+                searchbyString = "&Lib=" + URLEncoder.encode("7", "UTF-8");
+            }
+            if(menu_bookmobile.isChecked()){
+                searchbyString = "&Lib=" + URLEncoder.encode("8", "UTF-8");
+            }
+        }
+            String urlParameters1 =
+                    "DispType=" + URLEncoder.encode("list", "UTF-8") +
+                            //"perPageDispTracker=" +URLEncoder.encode("25", "UTF-8")+
+                            "&date_type=" + URLEncoder.encode("range", "UTF-8") +
+                            "&dr1Month=" + URLEncoder.encode(Integer.toString(startMonth), "UTF-8") +
+                            "&dr1Day=" + URLEncoder.encode(Integer.toString(startDay), "UTF-8") +
+                            "&dr1Year=" + URLEncoder.encode(Integer.toString(startYear), "UTF-8") +
+                            "&dr2Month=" + URLEncoder.encode(Integer.toString(endMonth), "UTF-8") +
+                            "&dr2Day=" + URLEncoder.encode(Integer.toString(endDay), "UTF-8") +
+                            "&dr2Year=" + URLEncoder.encode(Integer.toString(endYear), "UTF-8") +
+                            "&keyword=" + URLEncoder.encode(searchresults, "UTF-8")+ searchbyString;
 
-        String urlParameters2 =
-                "DispType=" + URLEncoder.encode("list", "UTF-8") +
-                "&pageTracker=" + URLEncoder.encode(Integer.toString(searchPage), "UTF-8") +
-                "&SaveDispType=" +URLEncoder.encode("list", "UTF-8") +
-                "&perPageDispTracker=" +URLEncoder.encode("25", "UTF-8")+
-                "&dt=" +URLEncoder.encode("range", "UTF-8")+
-                "&ds=" +URLEncoder.encode(Integer.toString(startYear)+"-"+Integer.toString(startMonth)+"-"+Integer.toString(startDay), "UTF-8")+
-                "&de=" +URLEncoder.encode(Integer.toString(endYear)+"-"+Integer.toString(endMonth)+"-"+Integer.toString(endDay), "UTF-8")+
-                "&keyword=" + URLEncoder.encode(searchresults, "UTF-8");
-
-
+            String urlParameters2 =
+                    "DispType=" + URLEncoder.encode("list", "UTF-8") +
+                            "&pageTracker=" + URLEncoder.encode(Integer.toString(searchPage), "UTF-8") +
+                            "&SaveDispType=" + URLEncoder.encode("list", "UTF-8") +
+                            "&perPageDispTracker=" + URLEncoder.encode("25", "UTF-8") +
+                            "&dt=" + URLEncoder.encode("range", "UTF-8") +
+                            "&ds=" + URLEncoder.encode(Integer.toString(startYear) + "-" + Integer.toString(startMonth) + "-" + Integer.toString(startDay), "UTF-8") +
+                            "&de=" + URLEncoder.encode(Integer.toString(endYear) + "-" + Integer.toString(endMonth) + "-" + Integer.toString(endDay), "UTF-8") +
+                            "&keyword=" + URLEncoder.encode(searchresults, "UTF-8")+ searchbyString;
 
         con1.setRequestMethod("POST");
 
-        //Send request
-        DataOutputStream wr = new DataOutputStream (
-                con1.getOutputStream ());
-        if(searchPage == 1) {
-            wr.writeBytes(urlParameters1);
-        }
-        else{
-            wr.writeBytes(urlParameters2);
+            //Send request
+            DataOutputStream wr = new DataOutputStream(
+                    con1.getOutputStream());
+            if (searchPage == 1) {
+                wr.writeBytes(urlParameters1);
+            } else {
+                wr.writeBytes(urlParameters2);
+
+            }
+            wr.flush();
+            wr.close();
+
+            BufferedReader in1 = new BufferedReader(
+                    new InputStreamReader(con1.getInputStream()));
+            String inputLine1;
+            StringBuffer response1 = new StringBuffer();
+
+            while ((inputLine1 = in1.readLine()) != null) {
+                response1.append(inputLine1);
+            }
+            in1.close();
+            String str = response1.toString();
+
+            HtmlCleaner cleaner = new HtmlCleaner();
+            CleanerProperties props = cleaner.getProperties();
+            props.setAllowHtmlInsideAttributes(true);
+            props.setAllowMultiWordAttributes(true);
+            props.setRecognizeUnicodeChars(true);
+            props.setOmitComments(false);
+
+            //HTML page root node
+            TagNode root = cleaner.clean(str);
+            cleaner.getInnerHtml(root);
+
+            String html = "<" + root.getName() + ">" + cleaner.getInnerHtml(root) + "</" + root.getName() + ">";
+            InputSource source = new InputSource(new StringReader(html));
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document document = db.parse(source);
+
+            XPathFactory xpathFactory = XPathFactory.newInstance();
+            XPath xpath = xpathFactory.newXPath();
+            Node testNode1 = (Node) xpath.evaluate("//div[@id = 'divBody']", document, XPathConstants.NODE);
+            NodeList testNode = (NodeList) xpath.evaluate(".//table[@class = 'event']/tbody/tr[2]", testNode1, XPathConstants.NODESET);
+            for (int index = 0; index < testNode.getLength(); index++) {
+                Node anode = testNode.item(index);
+                //Node tNode = (Node)xpath.evaluate(".//td[@class = 'event_values']", anode, XPathConstants.NODE);
+                Node subNode = (Node) xpath.evaluate(".//span[@class='event_title_list_special_class']", anode, XPathConstants.NODE);
+                String testName = xpath.evaluate(".", subNode);
+                if (testName != "") {
+                    CalendarNameArray.add(testName);
+                    subNode = (Node) xpath.evaluate(".//td/text()[preceding-sibling::br[4]]", anode, XPathConstants.NODE);
+                    String testAuth = xpath.evaluate(".", subNode);
+                    LocationArray.add(testAuth);
+                    subNode = (Node) xpath.evaluate(".//td/text()[preceding-sibling::br[2]]", anode, XPathConstants.NODE);
+                    String testForm = xpath.evaluate(".", subNode);
+                    DateArray.add(testForm);
+                    subNode = (Node) xpath.evaluate(".//td/span/a/@href", anode, XPathConstants.NODE);
+                    String testURL = xpath.evaluate(".", subNode);
+                    CalendarDetailsURLArray.add(testURL);
+                    String testPic = "";
+                    if ((subNode = (Node) xpath.evaluate(".//img", anode, XPathConstants.NODE)) != null) {
+                        testPic = "http://events.cmclibrary.org/" + xpath.evaluate("./@src", subNode);
+
+                    }
+                    if (testPic == "") {
+                        testPic = "/";
+                    }
+                    PicturesArray.add(testPic);
+                }
+            }
 
         }
-        wr.flush();
-        wr.close();
+    public void doDetailSearch() throws Exception {
+        String USER_AGENT = "Chrome/43.0.2357.134";
+        URL obj1 = new URL(detailsURL);
+        HttpURLConnection.setFollowRedirects(true);
 
+        //Open the real connection
+        HttpURLConnection con1 = (HttpURLConnection) obj1.openConnection();
+        con1.setRequestProperty("CSP", "active");
+        con1.setRequestProperty("Accept", "*/*");
+        con1.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
+        con1.setUseCaches(false);
+        con1.setDoInput(true);
+        con1.setChunkedStreamingMode(0);
+
+        con1.setRequestMethod("GET");
+        int responseCode = con1.getResponseCode();
         BufferedReader in1 = new BufferedReader(
                 new InputStreamReader(con1.getInputStream()));
         String inputLine1;
@@ -509,35 +604,10 @@ public class NewCalendarActivity extends ActionBarCastActivity {
 
         XPathFactory xpathFactory = XPathFactory.newInstance();
         XPath xpath = xpathFactory.newXPath();
-        Node testNode1 = (Node)xpath.evaluate("//div[@id = 'divBody']", document, XPathConstants.NODE);
-        NodeList testNode = (NodeList)xpath.evaluate(".//table[@class = 'event']/tbody/tr[2]", testNode1, XPathConstants.NODESET);
-        for (int index = 0; index < testNode.getLength(); index++) {
-            Node anode = testNode.item(index);
-            //Node tNode = (Node)xpath.evaluate(".//td[@class = 'event_values']", anode, XPathConstants.NODE);
-            Node subNode = (Node)xpath.evaluate(".//span[@class='event_title_list_special_class']", anode, XPathConstants.NODE);
-            String testName = xpath.evaluate(".", subNode);
-            if(testName != "") {
-                CalendarNameArray.add(testName);
-                subNode = (Node)xpath.evaluate(".//td/text()[preceding-sibling::br[4]]", anode, XPathConstants.NODE);
-                String testAuth = xpath.evaluate(".",subNode);
-                LocationArray.add(testAuth);
-                subNode = (Node)xpath.evaluate(".//td/text()[preceding-sibling::br[2]]", anode, XPathConstants.NODE);
-                String testForm = xpath.evaluate(".",subNode);
-                DateArray.add(testForm);
-                String testPic = "";
-                if((subNode = (Node)xpath.evaluate(".//img", anode, XPathConstants.NODE)) != null){
-                    testPic = "http://events.cmclibrary.org/"+ xpath.evaluate("./@src",subNode);
-
-
-                }
-                if(testPic == ""){
-                    testPic= "/";
-                }
-                PicturesArray.add(testPic);
-            }
-        }
+        Node testNode1 = (Node) xpath.evaluate("//html/body/div[3]/table/tbody/tr[2]/td", document, XPathConstants.NODE);
+        detailsName = xpath.evaluate(".", testNode1);
+    }
 
     }
 
-}
 

@@ -79,4 +79,16 @@
     <string name="date_range">Date Range</string>
     <string name="datepicker_start">Start Date</string>
     <string name="datepicker_end">End Date</string>
+    <string name="menu_library">Libraries</string>
+    <string name="menu_bookmobile">Bookmobile</string>
+    <string name="menu_cape_may_city_library">Cape May City Library</string>
+    <string name="menu_cape_may_courthouse_library">Cape May Courthouse Library</string>
+    <string name="menu_lower_cape_library">Lower Cape Library</string>
+    <string name="menu_sea_isle_city_library">Sea Isle City Library</string>
+    <string name="menu_stone_harbor_library">Stone Harbor Library</string>
+    <string name="menu_upper_cape_library">Upper Cape Library</string>
+    <string name="menu_wildwood_crest_library">Wildwood Crest Library</string>
+    <string name="menu_woodbine_library">Woodbine Library</string>
+    <string name="search_byAll">All Libraries</string>
+    <string name="calendar_details_test">Test</string>
 </resources>
