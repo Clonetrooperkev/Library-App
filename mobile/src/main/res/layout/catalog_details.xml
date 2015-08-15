@@ -8,6 +8,9 @@
         android:textColor="@color/blue"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:text="I know you I walked with you once upon a dream"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
         android:layout_gravity="center_vertical"
         android:textSize="25sp"/>
     <TextView
@@ -15,6 +18,9 @@
         android:textColor="@color/drawer_item_tint_color"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="15dp"
+        android:text="I know you I walked with you once upon a dream"
+        android:layout_marginRight="15dp"
         android:maxLines = "12"
         android:scrollbars = "vertical"
         android:layout_gravity="center_vertical"/>
@@ -23,6 +29,10 @@
         android:textColor="@color/drawer_item_tint_color"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:text="I know you I walked with you once upon a dream"
+
         android:maxLines = "12"
         android:textSize="12sp"
         android:scrollbars = "vertical"

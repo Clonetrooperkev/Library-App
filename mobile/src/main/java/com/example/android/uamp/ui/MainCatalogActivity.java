@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v7.widget.SearchView;
+import android.text.TextUtils;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -79,6 +80,7 @@ public class MainCatalogActivity extends ActionBarCastActivity{
     String detailsAvailability= "";
     ListView lv;
     Parcelable state = null;
+    boolean firstDetailSearch;
     //private Context context = null;
     private static final String TAG = LogHelper.makeLogTag(MainCatalogActivity.class);
     public String searchresults = "a";
@@ -112,6 +114,7 @@ public class MainCatalogActivity extends ActionBarCastActivity{
     int searchPage;
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        firstDetailSearch = true;
         detailsURL = "";
         catalogUnavailableError = false;
         LogHelper.w(TAG, "Testing Joe");
@@ -210,7 +213,10 @@ public class MainCatalogActivity extends ActionBarCastActivity{
                 (SearchView) menu.findItem(R.id.menu_search).getActionView();
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
-
+        //Restores search result in search field
+        if (!TextUtils.isEmpty(searchresults)) {
+            searchView.setQuery(searchresults, false);
+        }
         MenuItem searchbyMenu = menu.findItem(R.id.menu_searchby);
         SubMenu submenu = searchbyMenu.getSubMenu();
         searchby_any_MenuItem = submenu.findItem(R.id.searchby_any);
@@ -524,8 +530,23 @@ public class MainCatalogActivity extends ActionBarCastActivity{
         String USER_AGENT = "Chrome/43.0.2357.134";
         URL obj1 = new URL(detailsURL);
         HttpURLConnection.setFollowRedirects(true);
+        //Get session ID if necessary
+        if(firstDetailSearch == true) {
+            HttpURLConnection conx = (HttpURLConnection) obj1.openConnection();
+            conx.setRequestProperty("CSP", "active");
+            conx.setRequestProperty("Accept", "*/*");
+            conx.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
+            conx.setUseCaches(false);
+            conx.setDoInput(true);
+            conx.setChunkedStreamingMode(0);
 
-        //Open the real connection
+            conx.setRequestMethod("GET");
+            int responseCodex = conx.getResponseCode();
+            BufferedReader inx = new BufferedReader(
+                    new InputStreamReader(conx.getInputStream()));
+            inx.close();
+            firstDetailSearch = false;
+        }
         HttpURLConnection con1 = (HttpURLConnection) obj1.openConnection();
         con1.setRequestProperty("CSP", "active");
         con1.setRequestProperty("Accept", "*/*");

@@ -29,14 +29,22 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="10sp"
-        android:layout_alignBottom="@+id/catImage"
-        android:layout_alignLeft="@+id/catalog_name"/>
+        android:text = "Cape May County Library"
+        android:layout_below="@+id/catalog_name"
+        android:layout_weight="1"
+        android:ellipsize="none"
+        android:singleLine="false"
+        android:layout_alignLeft="@+id/catalog_name"
+        android:layout_toLeftOf="@+id/catalog_format"/>
     <TextView
         android:id="@+id/catalog_format"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="10sp"
-        android:layout_alignBottom="@+id/catalog_author"
+        android:textColor="@color/dark_grey"
+        android:text = "September 15, 2015"
+        android:layout_weight="1"
+        android:layout_below="@+id/catalog_name"
         android:layout_alignParentRight="true"
         android:paddingRight="5dp"/>
 

@@ -29,6 +29,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/toolbar"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
             android:divider="#D3D3D3"
             android:dividerHeight="4px">
         </ListView>

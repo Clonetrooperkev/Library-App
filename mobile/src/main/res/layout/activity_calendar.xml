@@ -28,8 +28,13 @@
             android:id="@+id/calendarlist"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="15dp"
-            android:layout_below="@+id/toolbar" >
+            android:divider="#D3D3D3"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginTop="14dp"
+            android:layout_below="@+id/toolbar"
+            android:dividerHeight="4px"
+        android:layout_centerHorizontal="true">
         </ListView>
 
     </RelativeLayout>
