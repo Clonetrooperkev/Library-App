@@ -71,14 +71,13 @@ public class MainContactsActivity extends ActionBarCastActivity {
     private static final String TAG = LogHelper.makeLogTag(MainContactsActivity.class);
     List<String> contactsArray = new ArrayList<String>();
     List<String> urlArray = new ArrayList<String>();
-    ListView listview;
-    ArrayAdapter adapter;
     ProgressDialog mProgressDialog;
     boolean contactsUnavailableError;
-    String copiedtext;
+    boolean firstContactSearch;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         contactsUnavailableError = false;
+        firstContactSearch = false;
         LogHelper.w(TAG, "Testing Joe");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contacts);
@@ -111,8 +110,19 @@ public class MainContactsActivity extends ActionBarCastActivity {
             contactsArray.add(" Library Branches");
             urlArray.add(" Library Branches");
 
-            String url = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20html%20where%20url%3D%22http%3A%2F%2Fwww.cmclibrary.org%2Fabout-the-library%2Fcontact-us%22%20and%20xpath%3D%22%2F%2Fdiv%5B%40class%3D'component-content%20rt-joomla'%5D%22&format=json&callback=";
+            try {
 
+                    doContactSearch();
+            }
+            catch(Exception e){
+                LogHelper.e(TAG,e,"Things be wacky");
+            }
+
+
+
+
+
+            /*
             try {
                 // Retrive JSON Objects from the given URL in JSONfunctions.class
                 JSONObject json_data = JSONfunctions.getJSONfromURL(url);
@@ -141,7 +151,7 @@ public class MainContactsActivity extends ActionBarCastActivity {
                 Log.e("Error", e.getMessage());
                 e.printStackTrace();
             }
-
+            */
 
             return null;
         }
@@ -178,6 +188,89 @@ public class MainContactsActivity extends ActionBarCastActivity {
         }
     }
 
+    public void doContactSearch() throws Exception {
+        String url = "http://www.cmclibrary.org/about-the-library/contact-us";
+        String USER_AGENT = "Chrome/43.0.2357.134";
+        URL obj1 = new URL(url);
+        HttpURLConnection.setFollowRedirects(true);
+        //Get session ID if necessary
+        if(firstContactSearch == true) {
+            HttpURLConnection conx = (HttpURLConnection) obj1.openConnection();
+            conx.setRequestProperty("CSP", "active");
+            conx.setRequestProperty("Accept", "*/*");
+            conx.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
+            conx.setUseCaches(false);
+            conx.setDoInput(true);
+            conx.setChunkedStreamingMode(0);
+
+            conx.setRequestMethod("GET");
+            int responseCodex = conx.getResponseCode();
+            BufferedReader inx = new BufferedReader(
+                    new InputStreamReader(conx.getInputStream()));
+            inx.close();
+            firstContactSearch = false;
+        }
+        HttpURLConnection con1 = (HttpURLConnection) obj1.openConnection();
+        con1.setRequestProperty("CSP", "active");
+        con1.setRequestProperty("Accept", "*/*");
+        con1.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
+        con1.setUseCaches(false);
+        con1.setDoInput(true);
+        con1.setChunkedStreamingMode(0);
+
+        con1.setRequestMethod("GET");
+        int responseCode = con1.getResponseCode();
+        BufferedReader in1 = new BufferedReader(
+                new InputStreamReader(con1.getInputStream()));
+        String inputLine1;
+        StringBuffer response1 = new StringBuffer();
+
+        while ((inputLine1 = in1.readLine()) != null) {
+            response1.append(inputLine1);
+        }
+        in1.close();
+        String str = response1.toString();
+
+        HtmlCleaner cleaner = new HtmlCleaner();
+        CleanerProperties props = cleaner.getProperties();
+        props.setAllowHtmlInsideAttributes(true);
+        props.setAllowMultiWordAttributes(true);
+        props.setRecognizeUnicodeChars(true);
+        props.setOmitComments(false);
+
+        //HTML page root node
+        TagNode root = cleaner.clean(str);
+        cleaner.getInnerHtml(root);
+
+        String html = "<" + root.getName() + ">" + cleaner.getInnerHtml(root) + "</" + root.getName() + ">";
+        InputSource source = new InputSource(new StringReader(html));
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        Document document = db.parse(source);
+
+        XPathFactory xpathFactory = XPathFactory.newInstance();
+        XPath xpath = xpathFactory.newXPath();
+        /*
+        Node testNode1 = (Node) xpath.evaluate("//div[@class='nsm-long-item nsm-e35']", document, XPathConstants.NODE);
+        detailsTitle = xpath.evaluate(".", testNode1);
+        testNode1 = (Node) xpath.evaluate("//div[@class='nsm-long-item nsm-e9']", document, XPathConstants.NODE);
+        detailsSummary = xpath.evaluate(".",testNode1);
+        */
+        //Node testNode1 = (Node) xpath.evaluate("/html/body/div[1]/b", document, XPathConstants.NODE);
+        //detailsTitle = xpath.evaluate(".", testNode1);
+        NodeList testNode = (NodeList)xpath.evaluate("//span[@class='item-title']", document, XPathConstants.NODESET);
+        int i = testNode.getLength();
+        for (int index = 0; index < testNode.getLength(); index++) {
+            Node anode = testNode.item(index);
+            Node subNode = (Node)xpath.evaluate("./a", anode, XPathConstants.NODE);
+            String tempString = xpath.evaluate(".",subNode);
+            contactsArray.add(tempString);
+            subNode = (Node)xpath.evaluate("./a/@href", anode, XPathConstants.NODE);
+            tempString = xpath.evaluate(".",subNode);
+            urlArray.add(tempString);
+
+        }
+    }
 
 
 }
