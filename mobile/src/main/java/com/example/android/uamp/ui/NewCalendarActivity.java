@@ -13,6 +13,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v7.widget.SearchView;
+import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -68,6 +69,8 @@ public class NewCalendarActivity extends ActionBarCastActivity {
     public int day;
     EditText txtDate;
     String detailsName;
+    String detailsDescription;
+    String detailsInfo;
     ListView lv;
     Parcelable state = null;
     public int startDay = 0;
@@ -260,7 +263,14 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         });
 
         // Create and show the dialog
-        builder.setMessage(detailsName);
+        TextView tView = (TextView) customView.findViewById(R.id.calendar_details_name);
+        tView.setText(detailsName);
+        tView = (TextView) customView.findViewById(R.id.calendar_details_info);
+        tView.setMovementMethod(new ScrollingMovementMethod());
+        tView.setText(detailsInfo);
+        tView = (TextView) customView.findViewById(R.id.calendar_details_description);
+        tView.setMovementMethod(new ScrollingMovementMethod());
+        tView.setText(detailsDescription);
         builder.create().show();
     }
 
@@ -418,7 +428,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         con1.setDoOutput(true);
         con1.setChunkedStreamingMode(0);
         String searchbyString = "";
-        if(search_byAll.isChecked()){
+        if( (search_byAll == null) || (search_byAll.isChecked()) ){
             searchbyString = "&AllLibs=" + URLEncoder.encode("ALL", "UTF-8")+
                     "&Lib=" + URLEncoder.encode("0", "UTF-8")+
                     "&Lib=" + URLEncoder.encode("1", "UTF-8")+
@@ -605,6 +615,30 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         XPath xpath = xpathFactory.newXPath();
         Node testNode1 = (Node) xpath.evaluate("//html/body/div[3]/table/tbody/tr[2]/td", document, XPathConstants.NODE);
         detailsName = xpath.evaluate(".", testNode1);
+        testNode1 = (Node) xpath.evaluate("/html/body/div[3]/table/tbody/tr[4]/td/b[1]", document, XPathConstants.NODE);
+        detailsInfo = xpath.evaluate(".", testNode1);
+        testNode1 = (Node) xpath.evaluate("/html/body/div[3]/table/tbody/tr[4]/td/text()[preceding-sibling::b[1]]", document, XPathConstants.NODE);
+        detailsInfo += " " + xpath.evaluate(".", testNode1) + "\r\n";
+        testNode1 = (Node) xpath.evaluate("/html/body/div[3]/table/tbody/tr[4]/td/b[2]", document, XPathConstants.NODE);
+        detailsInfo += xpath.evaluate(".", testNode1);
+        testNode1 = (Node) xpath.evaluate("/html/body/div[3]/table/tbody/tr[4]/td/text()[preceding-sibling::b[2]]", document, XPathConstants.NODE);
+        detailsInfo += " " + xpath.evaluate(".", testNode1) + "\r\n";
+        testNode1 = (Node) xpath.evaluate("/html/body/div[3]/table/tbody/tr[4]/td/b[3]", document, XPathConstants.NODE);
+        detailsInfo += xpath.evaluate(".", testNode1);
+        testNode1 = (Node) xpath.evaluate("/html/body/div[3]/table/tbody/tr[4]/td/text()[preceding-sibling::b[3]]", document, XPathConstants.NODE);
+        detailsInfo += " " + xpath.evaluate(".", testNode1) + "\r\n";
+        testNode1 = (Node) xpath.evaluate("/html/body/div[3]/table/tbody/tr[4]/td/b[4]", document, XPathConstants.NODE);
+        detailsInfo += xpath.evaluate(".", testNode1);
+        testNode1 = (Node) xpath.evaluate("/html/body/div[3]/table/tbody/tr[4]/td/text()[preceding-sibling::b[4]]", document, XPathConstants.NODE);
+        detailsInfo += " " + xpath.evaluate(".", testNode1) + "\r\n";
+        testNode1 = (Node) xpath.evaluate("/html/body/div[3]/table/tbody/tr[4]/td/b[5]", document, XPathConstants.NODE);
+        detailsInfo += xpath.evaluate(".", testNode1);
+        testNode1 = (Node) xpath.evaluate("/html/body/div[3]/table/tbody/tr[4]/td/text()[preceding-sibling::b[5]]", document, XPathConstants.NODE);
+        detailsInfo += " " + xpath.evaluate(".", testNode1) + "\r\n";
+        testNode1 = (Node) xpath.evaluate("/html/body/div[3]/table/tbody/tr[4]/td/div[2]/text()[1]", document, XPathConstants.NODE);
+        detailsDescription = xpath.evaluate(".", testNode1) + "\r\n";
+        testNode1 = (Node) xpath.evaluate("/html/body/div[3]/table/tbody/tr[4]/td/div[2]/text()[2]", document, XPathConstants.NODE);
+        detailsDescription += xpath.evaluate(".", testNode1);
     }
 
     }

@@ -11,11 +11,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v7.widget.SearchView;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -70,9 +72,11 @@ import javax.xml.xpath.XPathFactory;
  * Placeholder activity for features that are not implemented in this sample, but
  * are in the navigation drawer.
  */
-public class MainCatalogActivity extends ActionBarCastActivity {
+public class MainCatalogActivity extends ActionBarCastActivity{
     String detailsURL = "";
-    String detailsName;
+    String detailsTitle;
+    String detailsSummary;
+    String detailsAvailability= "";
     ListView lv;
     Parcelable state = null;
     //private Context context = null;
@@ -142,6 +146,7 @@ public class MainCatalogActivity extends ActionBarCastActivity {
             }
             if(extras.containsKey("DETAILS")){
                 detailsURL = CatalogDetailsURLArray.get(extras.getInt("DETAILS"));
+                detailsAvailability = "";
             }
 
         }
@@ -158,6 +163,7 @@ public class MainCatalogActivity extends ActionBarCastActivity {
                 searchPage = 1;
                 searchresults = tempsearchresults;
                 state = null;
+                detailsAvailability = "";
             }
 
         }
@@ -356,66 +362,73 @@ public class MainCatalogActivity extends ActionBarCastActivity {
         });
 
         // Create and show the dialog
-        builder.setMessage(detailsName);
+        TextView tView = (TextView) customView.findViewById(R.id.catalog_details_title);
+        tView.setText(detailsTitle);
+        tView = (TextView) customView.findViewById(R.id.catalog_details_availability);
+        tView.setMovementMethod(new ScrollingMovementMethod());
+        tView.setText(detailsAvailability);
         builder.create().show();
     }
     public void doBookSearch() throws Exception {
         String Qurl = "http://cat.cmclibrary.org/polaris/search/searchresults.aspx?ctx=1.1033.0.0.3&type=Keyword&term=";
         //String bookSort = "&limit=TOM=bks";
         if (searchresults == ""){
-            searchresults = "b";
+            searchresults = "";
         }
         String url1 = "http://cat.cmclibrary.org/polaris/search/components/ajaxResults.aspx?page=";
         url1 += String.valueOf(searchPage);
         String url = Qurl + URLEncoder.encode(searchresults, "UTF-8");
         //url += bookSort;
+        if ( (searchby_any_MenuItem == null) || (searchby_any_MenuItem.isChecked() ) ){
+        }
+        else {
+            if (searchby_title_MenuItem.isChecked()) {
+                url += "&by=TI";
+            }
+            if (searchby_author_MenuItem.isChecked()) {
+                url += "&by=AU";
+            }
+            if (searchby_ISBN_MenuItem.isChecked()) {
+                url += "&by=ISBN";
+            }
+        }
+        if( (format_any_MenuItem == null) || format_any_MenuItem.isChecked() ){
 
-        if (searchby_any_MenuItem.isChecked() ){
         }
-        if (searchby_title_MenuItem.isChecked() ){
-            url+="&by=TI";
-        }
-        if (searchby_author_MenuItem.isChecked() ){
-            url+="&by=AU";
-        }
-        if (searchby_ISBN_MenuItem.isChecked() ){
-            url+="&by=ISBN";
-        }
-        if(format_any_MenuItem.isChecked()){
-
-        }
-        if(format_book_MenuItem.isChecked()){
-            url += "&limit=TOM=bks";
-        }
-        if(format_large_print_MenuItem.isChecked()){
-            url += "&limit=TOM=lpt";
-        }
-        if(format_audiobook_MenuItem.isChecked()){
-            url += "&limit=TOM=abk";
-        }
-        if(format_audio_ebook_MenuItem.isChecked()){
-            url += "&limit=TOM=aeb";
-        }
-        if(format_ebook_MenuItem.isChecked()){
-            url += "&limit=TOM=ebk";
-        }
-        if(format_dvd_MenuItem.isChecked()){
-            url += "&limit=TOM=dvd";
-        }
-        if(format_Bray_disc_MenuItem.isChecked()){
-            url += "&limit=TOM=brd";
-        }
-        if(format_videotape_MenuItem.isChecked()){
-            url += "&limit=TOM=vcr";
-        }
-        if(format_music_cd_MenuItem.isChecked()){
-            url += "&limit=TOM=mcd";
-        }
-        if(format_sound_recording_MenuItem.isChecked()){
-            url += "&limit=TOM=rec";
-        }
-        if(format_serial_MenuItem.isChecked()){
-            url += "&limit=TOM=ser";
+        else {
+            if (format_book_MenuItem.isChecked()) {
+                url += "&limit=TOM=bks";
+            }
+            if (format_large_print_MenuItem.isChecked()) {
+                url += "&limit=TOM=lpt";
+            }
+            if (format_audiobook_MenuItem.isChecked()) {
+                url += "&limit=TOM=abk";
+            }
+            if (format_audio_ebook_MenuItem.isChecked()) {
+                url += "&limit=TOM=aeb";
+            }
+            if (format_ebook_MenuItem.isChecked()) {
+                url += "&limit=TOM=ebk";
+            }
+            if (format_dvd_MenuItem.isChecked()) {
+                url += "&limit=TOM=dvd";
+            }
+            if (format_Bray_disc_MenuItem.isChecked()) {
+                url += "&limit=TOM=brd";
+            }
+            if (format_videotape_MenuItem.isChecked()) {
+                url += "&limit=TOM=vcr";
+            }
+            if (format_music_cd_MenuItem.isChecked()) {
+                url += "&limit=TOM=mcd";
+            }
+            if (format_sound_recording_MenuItem.isChecked()) {
+                url += "&limit=TOM=rec";
+            }
+            if (format_serial_MenuItem.isChecked()) {
+                url += "&limit=TOM=ser";
+            }
         }
         String USER_AGENT = "Chrome/43.0.2357.134";
         CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
@@ -493,7 +506,8 @@ public class MainCatalogActivity extends ActionBarCastActivity {
                 subNode = (Node)xpath.evaluate(".//span[@class='nsm-short-item nsm-e249']", anode, XPathConstants.NODE);
                 String testForm = xpath.evaluate(".",subNode);
                 FormatArray.add(testForm);
-                subNode = (Node) xpath.evaluate(".//a[@class='nsm-brief-action-link']/@href", anode, XPathConstants.NODE);
+                //subNode = (Node) xpath.evaluate(".//a[@class='nsm-brief-action-link']/@href", anode, XPathConstants.NODE);
+                subNode = (Node) xpath.evaluate(".//a[@class='results-title-link-avail']/@href", anode, XPathConstants.NODE);
                 String testURL = xpath.evaluate(".", subNode);
                 CatalogDetailsURLArray.add(testURL);
                 subNode = (Node)xpath.evaluate(".//img[@class='thumbnail']/@src", anode, XPathConstants.NODE);
@@ -552,8 +566,21 @@ public class MainCatalogActivity extends ActionBarCastActivity {
 
         XPathFactory xpathFactory = XPathFactory.newInstance();
         XPath xpath = xpathFactory.newXPath();
+        /*
         Node testNode1 = (Node) xpath.evaluate("//div[@class='nsm-long-item nsm-e35']", document, XPathConstants.NODE);
-        detailsName = xpath.evaluate(".", testNode1);
+        detailsTitle = xpath.evaluate(".", testNode1);
+        testNode1 = (Node) xpath.evaluate("//div[@class='nsm-long-item nsm-e9']", document, XPathConstants.NODE);
+        detailsSummary = xpath.evaluate(".",testNode1);
+        */
+        Node testNode1 = (Node) xpath.evaluate("/html/body/div[1]/b", document, XPathConstants.NODE);
+        detailsTitle = xpath.evaluate(".", testNode1);
+        NodeList testNode = (NodeList)xpath.evaluate("//td[@class='location']", testNode1, XPathConstants.NODESET);
+        int i = testNode.getLength();
+        for (int index = 0; index < testNode.getLength(); index++) {
+            Node anode = testNode.item(index);
+            detailsAvailability += xpath.evaluate(".",anode) + "\r\n";
+
+        }
     }
 
 }

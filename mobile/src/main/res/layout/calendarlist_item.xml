@@ -17,9 +17,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="23dp"
-        android:layout_marginTop="10dp"
         android:textSize="15sp"
         android:layout_toRightOf="@+id/calImage"
+        android:layout_alignTop="@+id/calImage"
         android:textColor="@color/black"
         android:minLines="1"
         android:maxLines="2"
@@ -29,14 +29,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="10sp"
-        android:layout_alignBottom="@+id/calImage"
+        android:layout_below="@+id/calendar_name"
+        android:layout_weight=".5"
         android:layout_alignLeft="@+id/calendar_name"/>
     <TextView
         android:id="@+id/calendar_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="10sp"
-        android:layout_alignBottom="@+id/calendar_location"
+        android:layout_weight=".5"
+        android:layout_below="@+id/calendar_name"
         android:layout_alignParentRight="true"
         android:paddingRight="5dp"/>
 

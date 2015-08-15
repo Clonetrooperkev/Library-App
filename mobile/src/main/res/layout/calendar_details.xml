@@ -4,11 +4,29 @@
     android:orientation="vertical" >
 
     <TextView
-        android:id="@+id/calendar_details_test"
+        android:id="@+id/calendar_details_name"
+        android:textColor="@color/blue"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textSize="25sp"
+        android:layout_gravity="center_vertical"/>
+    <TextView
+        android:id="@+id/calendar_details_info"
+        android:layout_marginTop="10dp"
         android:textColor="@color/drawer_item_tint_color"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/calendar_details_test"
+        android:maxLines = "12"
+        android:scrollbars = "vertical"
+        android:textSize="15sp"
         android:layout_gravity="center_vertical"/>
-
+    <TextView
+        android:id="@+id/calendar_details_description"
+        android:layout_marginTop="10dp"
+        android:textColor="@color/drawer_item_tint_color"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:maxLines = "12"
+        android:scrollbars = "vertical"
+        android:layout_gravity="center_vertical"/>
 </LinearLayout>
