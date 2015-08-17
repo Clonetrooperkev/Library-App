@@ -20,10 +20,14 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -63,30 +67,75 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
-/**
- * Placeholder activity for features that are not implemented in this sample, but
- * are in the navigation drawer.
- */
 public class MainContactsActivity extends ActionBarCastActivity {
     private static final String TAG = LogHelper.makeLogTag(MainContactsActivity.class);
     List<String> contactsArray = new ArrayList<String>();
     List<String> urlArray = new ArrayList<String>();
+    ListView lv;
+    String detailsURL;
+    String detailsArray;
+    Parcelable state = null;
     ProgressDialog mProgressDialog;
     boolean contactsUnavailableError;
     boolean firstContactSearch;
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        detailsURL = "";
         contactsUnavailableError = false;
         firstContactSearch = false;
-        LogHelper.w(TAG, "Testing Joe");
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_contacts);
-        initializeToolbar();
-        setTitle("Contacts");
-        //setContentView(R.layout.activity_placeholder);
+        handleIntent(getIntent());
+
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        handleIntent(intent);
+    }
+
+    public void handleIntent(Intent intent) {
+        Bundle extras = intent.getExtras();
+        if (extras != null) {
+            if(extras.containsKey("DETAILS")){
+                detailsURL = "http://www.cmclibrary.org/" + urlArray.get(extras.getInt("DETAILS"));
+            }
+
+        }
+            if(detailsURL.equals("")){
+                setContentView(R.layout.activity_contacts);
+                initializeToolbar();
+                setTitle("Contacts");
+                state = null;
+                contactsArray.clear();
+                urlArray.clear();
+                contactsArray.add("Library Branches");
+                urlArray.add("Library Branches");
+            }
 
         new DownloadJSON().execute();
+    }
+    public void showDetails() {
+        LayoutInflater inflater = (LayoutInflater) getLayoutInflater();
+        View customView = inflater.inflate(R.layout.contact_details, null);
 
+        // Build the dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(customView); // Set the view of the dialog to your custom layout
+        //builder.setTitle("Select start and end date");
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                detailsURL = "";
+
+            }
+        });
+
+        // Create and show the dialog
+        TextView tView = (TextView) customView.findViewById(R.id.contact_details);
+        tView.setMovementMethod(new ScrollingMovementMethod());
+        tView.setText(detailsArray);
+        builder.create().show();
     }
     // DownloadJSON AsyncTask
     private class DownloadJSON extends AsyncTask<Void, Void, Void> {
@@ -107,76 +156,46 @@ public class MainContactsActivity extends ActionBarCastActivity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            contactsArray.add(" Library Branches");
-            urlArray.add(" Library Branches");
+
 
             try {
-
+                if(detailsURL.equals("")){
                     doContactSearch();
+                }
+                else{
+                    doDetailSearch();
+                }
             }
             catch(Exception e){
                 LogHelper.e(TAG,e,"Things be wacky");
             }
-
-
-
-
-
-            /*
-            try {
-                // Retrive JSON Objects from the given URL in JSONfunctions.class
-                JSONObject json_data = JSONfunctions.getJSONfromURL(url);
-                JSONObject json_query = json_data.getJSONObject("query");
-                JSONObject json_results = json_query.getJSONObject("results");
-                JSONObject json_div1 = json_results.getJSONObject("div");
-                JSONObject json_div2 = json_div1.getJSONObject("div");
-                JSONObject json_ul = json_div2.getJSONObject("ul");
-                //JSONObject json_li = json_ul.getJSONObject("li");
-
-               // JSONObject json_json_li = json_ul.getJSONObject("json");
-                JSONArray json_result = json_ul.getJSONArray("li");
-                for (int i = 0; i < json_result.length(); i++) {
-                    JSONObject c = json_result.getJSONObject(i);
-                    JSONObject vo = c.getJSONObject("span");
-                    JSONObject va = vo.getJSONObject("a");
-                    contactsArray.add(va.optString("content"));
-                    urlArray.add(va.optString("href"));
-
-
-                }
-
-            } catch (JSONException e) {
-                contactsUnavailableError = true;
-
-                Log.e("Error", e.getMessage());
-                e.printStackTrace();
-            }
-            */
-
             return null;
         }
 
         @Override
         protected void onPostExecute(Void args) {
-            ListView lv = (ListView) findViewById(R.id.contactslist);
-            lv.setAdapter(new ArrayAdapter<String>(MainContactsActivity.this, R.layout.contactlist_item, R.id.contact_name, contactsArray));
+            ArrayAdapter ContactsArrayAdapter = new ArrayAdapter<String>(MainContactsActivity.this, R.layout.contactlist_item, R.id.contact_name, contactsArray);
+            lv = (ListView)findViewById(R.id.contactslist);
+            lv.setAdapter(ContactsArrayAdapter);
+            if(state != null){
+                lv.onRestoreInstanceState(state);
+            }
+            if(!detailsURL.equals("")) {
+                showDetails();
+            }
             lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                    String contactName = ((TextView) view.findViewById(R.id.contact_name)).getText().toString();
-
-                    Toast.makeText(getApplicationContext(), contactName, Toast.LENGTH_SHORT).show();
                     if (position >= 0) {
+                        state = lv.onSaveInstanceState();
                         Bundle extras = ActivityOptions.makeCustomAnimation(
                                 MainContactsActivity.this, R.anim.fade_in, R.anim.fade_out).toBundle();
 
-                        Class activityClass = SubContactsActivity.class;
-                        Intent subIntent = new Intent(MainContactsActivity.this, activityClass);
-                        subIntent.putExtra("SUBCONTACTKEY", urlArray.get(position));
-                        startActivity (subIntent, extras);
-                        finish();
+                        Intent subIntent = new Intent(MainContactsActivity.this, MainContactsActivity.class);
+                        subIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        subIntent.putExtra("DETAILS", position);
+                        startActivity(subIntent, extras);
                     }
 
                 }
@@ -250,25 +269,116 @@ public class MainContactsActivity extends ActionBarCastActivity {
 
         XPathFactory xpathFactory = XPathFactory.newInstance();
         XPath xpath = xpathFactory.newXPath();
-        /*
-        Node testNode1 = (Node) xpath.evaluate("//div[@class='nsm-long-item nsm-e35']", document, XPathConstants.NODE);
-        detailsTitle = xpath.evaluate(".", testNode1);
-        testNode1 = (Node) xpath.evaluate("//div[@class='nsm-long-item nsm-e9']", document, XPathConstants.NODE);
-        detailsSummary = xpath.evaluate(".",testNode1);
-        */
-        //Node testNode1 = (Node) xpath.evaluate("/html/body/div[1]/b", document, XPathConstants.NODE);
-        //detailsTitle = xpath.evaluate(".", testNode1);
         NodeList testNode = (NodeList)xpath.evaluate("//span[@class='item-title']", document, XPathConstants.NODESET);
         int i = testNode.getLength();
         for (int index = 0; index < testNode.getLength(); index++) {
             Node anode = testNode.item(index);
             Node subNode = (Node)xpath.evaluate("./a", anode, XPathConstants.NODE);
             String tempString = xpath.evaluate(".",subNode);
+            tempString = tempString.trim();
             contactsArray.add(tempString);
             subNode = (Node)xpath.evaluate("./a/@href", anode, XPathConstants.NODE);
             tempString = xpath.evaluate(".",subNode);
             urlArray.add(tempString);
 
+        }
+    }
+    public void doDetailSearch()throws Exception{
+        detailsArray = "";
+        if(detailsURL.equals("http://www.cmclibrary.org/Library Branches")){
+            detailsArray = "Main Branch"+ "\r\n";
+            detailsArray += "       609-463-6350"+ "\r\n";
+            detailsArray +="Cape May City"+ "\r\n";
+            detailsArray += "      609-884-9568"+ "\r\n";
+            detailsArray +="Lower Township"+ "\r\n";
+            detailsArray += "      609-886-8999"+ "\r\n";
+            detailsArray +="Sea Isle City"+ "\r\n";
+            detailsArray += "      609-263-7301"+ "\r\n";
+            detailsArray +="Stone Harbor"+ "\r\n";
+            detailsArray += "      609-36-86809"+ "\r\n";
+            detailsArray +="Upper Township"+ "\r\n";
+            detailsArray += "      609-628-2607"+ "\r\n";
+            detailsArray +="Wildwood Crest"+ "\r\n";
+            detailsArray += "      609-522-0564"+ "\r\n";
+            detailsArray +="Woodbine"+ "\r\n";
+            detailsArray += "      609-861-2501"+ "\r\n";
+
+        }
+        else{
+            String USER_AGENT = "Chrome/43.0.2357.134";
+            URL obj1 = new URL(detailsURL);
+            HttpURLConnection.setFollowRedirects(true);
+            //Get session ID if necessary
+            if(firstContactSearch == true) {
+                HttpURLConnection conx = (HttpURLConnection) obj1.openConnection();
+                conx.setRequestProperty("CSP", "active");
+                conx.setRequestProperty("Accept", "*/*");
+                conx.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
+                conx.setUseCaches(false);
+                conx.setDoInput(true);
+                conx.setChunkedStreamingMode(0);
+
+                conx.setRequestMethod("GET");
+                int responseCodex = conx.getResponseCode();
+                BufferedReader inx = new BufferedReader(
+                        new InputStreamReader(conx.getInputStream()));
+                inx.close();
+                firstContactSearch = false;
+            }
+            HttpURLConnection con1 = (HttpURLConnection) obj1.openConnection();
+            con1.setRequestProperty("CSP", "active");
+            con1.setRequestProperty("Accept", "*/*");
+            con1.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
+            con1.setUseCaches(false);
+            con1.setDoInput(true);
+            con1.setChunkedStreamingMode(0);
+
+            con1.setRequestMethod("GET");
+            int responseCode = con1.getResponseCode();
+            BufferedReader in1 = new BufferedReader(
+                    new InputStreamReader(con1.getInputStream()));
+            String inputLine1;
+            StringBuffer response1 = new StringBuffer();
+
+            while ((inputLine1 = in1.readLine()) != null) {
+                response1.append(inputLine1);
+            }
+            in1.close();
+            String str = response1.toString();
+
+            HtmlCleaner cleaner = new HtmlCleaner();
+            CleanerProperties props = cleaner.getProperties();
+            props.setAllowHtmlInsideAttributes(true);
+            props.setAllowMultiWordAttributes(true);
+            props.setRecognizeUnicodeChars(true);
+            props.setOmitComments(false);
+
+            //HTML page root node
+            TagNode root = cleaner.clean(str);
+            cleaner.getInnerHtml(root);
+
+            String html = "<" + root.getName() + ">" + cleaner.getInnerHtml(root) + "</" + root.getName() + ">";
+            InputSource source = new InputSource(new StringReader(html));
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document document = db.parse(source);
+
+            XPathFactory xpathFactory = XPathFactory.newInstance();
+            XPath xpath = xpathFactory.newXPath();
+            NodeList testNode = (NodeList)xpath.evaluate("//td[@class='item-title']", document, XPathConstants.NODESET);
+            NodeList testNode2 = (NodeList)xpath.evaluate("//td[@class='item-phone']", document, XPathConstants.NODESET);
+            int i = testNode.getLength();
+            for (int index = 0; index < testNode.getLength(); index++) {
+                Node anode = testNode.item(index);
+                Node subNode = (Node)xpath.evaluate("./a", anode, XPathConstants.NODE);
+                String tempString = xpath.evaluate(".",subNode);
+                tempString = tempString.trim();
+                detailsArray += (tempString) + "\r\n";
+                anode = testNode2.item(index);
+                tempString = xpath.evaluate(".",anode);
+                tempString = tempString.trim();
+                detailsArray += "      "+ (tempString) + "\r\n";
+            }
         }
     }
 

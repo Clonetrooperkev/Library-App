@@ -111,6 +111,7 @@ public class MainCatalogActivity extends ActionBarCastActivity{
     MenuItem format_sound_recording_MenuItem;
     MenuItem format_serial_MenuItem;
     SearchView searchView;
+    View footerView;
     int searchPage;
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -138,7 +139,6 @@ public class MainCatalogActivity extends ActionBarCastActivity{
     public void handleIntent(Intent intent) {
         String tempsearchresults = "";
         String moreButton = "";
-        setContentView(R.layout.activity_catalog);
         Bundle extras = intent.getExtras();
         if(extras != null) {
             if(extras.containsKey("SEARCHVALUE")) {
@@ -159,21 +159,24 @@ public class MainCatalogActivity extends ActionBarCastActivity{
         }
         else{
             if(detailsURL.equals("")){
+                setContentView(R.layout.activity_catalog);
+                initializeToolbar();
+                setTitle("Catalog");
                 CatalogArray.clear();
                 AuthorArray.clear();
                 FormatArray.clear();
                 PicturesArray.clear();
+                CatalogDetailsURLArray.clear();
                 searchPage = 1;
                 searchresults = tempsearchresults;
                 state = null;
+                footerView = null;
                 detailsAvailability = "";
             }
 
         }
 
 
-        initializeToolbar();
-        setTitle("Catalog");
         //setContentView(R.layout.activity_placeholder);
         new DownloadJSON().execute();
     }
@@ -308,20 +311,23 @@ public class MainCatalogActivity extends ActionBarCastActivity{
                 showDetails();
             }
             if(CatalogArray.size() != 0) {
-                View footerView = ((LayoutInflater) MainCatalogActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.footer, null, false);
-                lv.addFooterView(footerView);
-                Button forward = (Button) footerView.findViewById(R.id.loadMore);
-                forward.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View v) {
-                        state = lv.onSaveInstanceState();
-                        Bundle extras = ActivityOptions.makeCustomAnimation(
-                                MainCatalogActivity.this, R.anim.fade_in, R.anim.fade_out).toBundle();
-                        Intent searchIntent = new Intent(MainCatalogActivity.this, MainCatalogActivity.class);
-                        searchIntent.putExtra("MOREBUTTON", "true");
-                        searchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(searchIntent, extras);
-                    }
-                });
+                if(footerView == null){
+                    footerView = ((LayoutInflater) MainCatalogActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.footer, null, false);
+                    lv.addFooterView(footerView);
+                    Button forward = (Button) footerView.findViewById(R.id.loadMore);
+                    forward.setOnClickListener(new View.OnClickListener() {
+                        public void onClick(View v) {
+                            state = lv.onSaveInstanceState();
+                            Bundle extras = ActivityOptions.makeCustomAnimation(
+                                    MainCatalogActivity.this, R.anim.fade_in, R.anim.fade_out).toBundle();
+                            Intent searchIntent = new Intent(MainCatalogActivity.this, MainCatalogActivity.class);
+                            searchIntent.putExtra("MOREBUTTON", "true");
+                            searchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(searchIntent, extras);
+                        }
+                    });
+                }
+
             }
 
 

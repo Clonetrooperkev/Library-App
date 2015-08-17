@@ -109,6 +109,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
     MenuItem format_sound_recording_MenuItem;
     MenuItem format_serial_MenuItem;
     SearchView searchView;
+    View footerView;
     int searchPage;
 
     @Override
@@ -146,7 +147,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
     public void handleIntent(Intent intent) {
         String tempsearchresults = "";
         String moreButton = "";
-        setContentView(R.layout.activity_calendar);
+
         Bundle extras = intent.getExtras();
         if (extras != null) {
             if (extras.containsKey("SEARCHVALUE")) {
@@ -165,11 +166,16 @@ public class NewCalendarActivity extends ActionBarCastActivity {
 
         } else {
             if(detailsURL.equals("")){
+                setContentView(R.layout.activity_calendar);
+                initializeToolbar();
+                setTitle("Calendar");
                 CalendarNameArray.clear();
                 LocationArray.clear();
                 DateArray.clear();
                 PicturesArray.clear();
+                CalendarDetailsURLArray.clear();
                 searchPage = 1;
+                footerView = null;
                 searchresults = tempsearchresults;
                 state = null;
             }
@@ -177,8 +183,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         }
 
 
-        initializeToolbar();
-        setTitle("Calendar");
+
         //setContentView(R.layout.activity_placeholder);
         new fetchCalendarData().execute();
     }
@@ -361,20 +366,23 @@ public class NewCalendarActivity extends ActionBarCastActivity {
                 showDetails();
             }
             if (CalendarNameArray.size() != 0) {
-                View footerView = ((LayoutInflater) NewCalendarActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.footer, null, false);
-                lv.addFooterView(footerView);
-                Button forward = (Button) footerView.findViewById(R.id.loadMore);
-                forward.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View v) {
-                        state = lv.onSaveInstanceState();
-                        Bundle extras = ActivityOptions.makeCustomAnimation(
-                                NewCalendarActivity.this, R.anim.fade_in, R.anim.fade_out).toBundle();
-                        Intent searchIntent = new Intent(NewCalendarActivity.this, NewCalendarActivity.class);
-                        searchIntent.putExtra("MOREBUTTON", "true");
-                        searchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(searchIntent, extras);
-                    }
-                });
+                if(footerView == null){
+                    footerView = ((LayoutInflater) NewCalendarActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.footer, null, false);
+                    lv.addFooterView(footerView);
+                    Button forward = (Button) footerView.findViewById(R.id.loadMore);
+                    forward.setOnClickListener(new View.OnClickListener() {
+                        public void onClick(View v) {
+                            state = lv.onSaveInstanceState();
+                            Bundle extras = ActivityOptions.makeCustomAnimation(
+                                    NewCalendarActivity.this, R.anim.fade_in, R.anim.fade_out).toBundle();
+                            Intent searchIntent = new Intent(NewCalendarActivity.this, NewCalendarActivity.class);
+                            searchIntent.putExtra("MOREBUTTON", "true");
+                            searchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(searchIntent, extras);
+                        }
+                    });
+                }
+
             }
 
 
