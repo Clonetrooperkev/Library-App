@@ -27,6 +27,7 @@
     <TextView
         android:id="@+id/calendar_details_description"
         android:layout_marginTop="10dp"
+        android:autoLink="phone"
         android:textColor="@color/drawer_item_tint_color"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"

@@ -40,6 +40,7 @@ import org.xml.sax.InputSource;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.lang.reflect.Field;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
@@ -75,7 +76,6 @@ public class MainCatalogActivity extends ActionBarCastActivity{
     private List<String> FormatArray = new ArrayList<>();
     private List<String> PicturesArray = new ArrayList<>();
     private ProgressDialog mProgressDialog;
-    private boolean catalogUnavailableError;
     private MenuItem searchby_any_MenuItem;
     private MenuItem searchby_author_MenuItem;
     private MenuItem searchby_ISBN_MenuItem;
@@ -97,9 +97,11 @@ public class MainCatalogActivity extends ActionBarCastActivity{
     private int searchPage;
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        firstDetailSearch = true;
+        //detailsURL controls the state of the activity
+        //If detailsURL is not blank, perform a detail search
         detailsURL = "";
-        catalogUnavailableError = false;
+
+        firstDetailSearch = true;
         super.onCreate(savedInstanceState);
 
         //Every time catalog is entered: set "search by" and "format" to "any"
@@ -153,7 +155,6 @@ public class MainCatalogActivity extends ActionBarCastActivity{
                 searchresults = tempsearchresults;
                 state = null;
                 footerView = null;
-                detailsAvailability = "";
             }
 
         }
@@ -184,6 +185,32 @@ public class MainCatalogActivity extends ActionBarCastActivity{
         }
         return super.onOptionsItemSelected(item);
 
+    }
+    private void showDetails() {
+        // Inflate your custom layout containing 2 DatePickers
+        LayoutInflater inflater = getLayoutInflater();
+        View customView = inflater.inflate(R.layout.catalog_details, null);
+
+        // Build the dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(customView); // Set the view of the dialog to your custom layout
+        //builder.setTitle("Select start and end date");
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                detailsURL = "";
+
+            }
+        });
+
+        // Create and show the dialog
+        TextView tView = (TextView) customView.findViewById(R.id.catalog_details_title);
+        tView.setText(detailsTitle);
+        tView = (TextView) customView.findViewById(R.id.catalog_details_availability);
+        tView.setMovementMethod(new ScrollingMovementMethod());
+        tView.setText(detailsAvailability);
+        builder.create().show();
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -312,6 +339,14 @@ public class MainCatalogActivity extends ActionBarCastActivity{
                 }
 
             }
+            else{
+                if(searchresults.equals("")){
+                    Toast.makeText(getApplicationContext(), "Press the Search Icon to search the catalog", Toast.LENGTH_LONG).show();
+                }
+                else{
+                    Toast.makeText(getApplicationContext(), "Catalog Information Unavailable", Toast.LENGTH_LONG).show();
+                }
+            }
 
 
 
@@ -332,38 +367,11 @@ public class MainCatalogActivity extends ActionBarCastActivity{
 
                 }
             });
-            if (catalogUnavailableError) {
-                Toast.makeText(getApplicationContext(), "Catalog Information Unavailable", Toast.LENGTH_LONG).show();
-            }
+
             mProgressDialog.dismiss();
         }
     }
-    private void showDetails() {
-        // Inflate your custom layout containing 2 DatePickers
-        LayoutInflater inflater = getLayoutInflater();
-        View customView = inflater.inflate(R.layout.catalog_details, null);
 
-        // Build the dialog
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setView(customView); // Set the view of the dialog to your custom layout
-        //builder.setTitle("Select start and end date");
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-                detailsURL = "";
-
-            }
-        });
-
-        // Create and show the dialog
-        TextView tView = (TextView) customView.findViewById(R.id.catalog_details_title);
-        tView.setText(detailsTitle);
-        tView = (TextView) customView.findViewById(R.id.catalog_details_availability);
-        tView.setMovementMethod(new ScrollingMovementMethod());
-        tView.setText(detailsAvailability);
-        builder.create().show();
-    }
     private void doBookSearch() throws Exception {
         String Qurl = "http://cat.cmclibrary.org/polaris/search/searchresults.aspx?ctx=1.1033.0.0.3&type=Keyword&term=";
         //String bookSort = "&limit=TOM=bks";

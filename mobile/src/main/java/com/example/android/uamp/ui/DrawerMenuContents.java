@@ -35,7 +35,6 @@ public class DrawerMenuContents {
         activities[0] = MainCatalogActivity.class;
         items.add(populateDrawerItem("Catalog",
             R.drawable.ic_search_category_default));
-
         activities[1] = NewCalendarActivity.class;
         items.add(populateDrawerItem("Calendar",
             R.drawable.ic_menu_my_calendar));

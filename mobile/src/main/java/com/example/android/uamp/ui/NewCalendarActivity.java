@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v7.widget.SearchView;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -55,10 +56,6 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
-/**
- * Placeholder activity for features that are not implemented in this sample, but
- * are in the navigation drawer.
- */
 public class NewCalendarActivity extends ActionBarCastActivity {
     private String detailsURL = "";
     private String detailsName;
@@ -79,7 +76,6 @@ public class NewCalendarActivity extends ActionBarCastActivity {
     private List<String> DateArray = new ArrayList<>();
     private List<String> PicturesArray = new ArrayList<>();
     private ProgressDialog mProgressDialog;
-    private boolean catalogUnavailableError;
     private MenuItem search_byAll;
     private MenuItem menu_bookmobile;
     private MenuItem menu_cape_may_city_library;
@@ -93,10 +89,15 @@ public class NewCalendarActivity extends ActionBarCastActivity {
     private SearchView searchView;
     private View footerView;
     private int searchPage;
+    private boolean firstCalendarSearch;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        //detailsURL controls the state of the activity
+        //If detailsURL is not blank, perform a detail search
         detailsURL = "";
+
+        firstCalendarSearch = true;
         final Calendar currentCal = Calendar.getInstance();
         endYear = (startYear = currentCal.get(Calendar.YEAR));
         endMonth = (startMonth = currentCal.get(Calendar.MONTH) + 1) + 1;
@@ -106,10 +107,9 @@ public class NewCalendarActivity extends ActionBarCastActivity {
             endYear += 1;
         }
 
-        catalogUnavailableError = false;
         super.onCreate(savedInstanceState);
 
-        //Every time catalog is entered: set "searchbyAll" to "any"
+        //Every time calendar is entered: set "searchbyAll" to "any"
         SharedPreferences settings = getSharedPreferences("settings", 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.clear();
@@ -161,15 +161,38 @@ public class NewCalendarActivity extends ActionBarCastActivity {
                 searchresults = tempsearchresults;
                 state = null;
             }
-
         }
-
-
-
-        //setContentView(R.layout.activity_placeholder);
         new fetchCalendarData().execute();
     }
+    private void showDetails() {
+        // Inflate your custom layout containing 2 DatePickers
+        LayoutInflater inflater = (LayoutInflater) getLayoutInflater();
+        View customView = inflater.inflate(R.layout.calendar_details, null);
 
+        // Build the dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(customView); // Set the view of the dialog to your custom layout
+        //builder.setTitle("Select start and end date");
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                detailsURL = "";
+
+            }
+        });
+
+        // Create and show the dialog
+        TextView tView = (TextView) customView.findViewById(R.id.calendar_details_name);
+        tView.setText(detailsName);
+        tView = (TextView) customView.findViewById(R.id.calendar_details_info);
+        tView.setMovementMethod(new ScrollingMovementMethod());
+        tView.setText(detailsInfo);
+        tView = (TextView) customView.findViewById(R.id.calendar_details_description);
+        tView.setMovementMethod(new ScrollingMovementMethod());
+        tView.setText(detailsDescription);
+        builder.create().show();
+    }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if ((item.getItemId() == R.id.menu_range)) {
@@ -231,35 +254,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         builder.create().show();
     }
 
-    private void showDetails() {
-        // Inflate your custom layout containing 2 DatePickers
-        LayoutInflater inflater = (LayoutInflater) getLayoutInflater();
-        View customView = inflater.inflate(R.layout.calendar_details, null);
 
-        // Build the dialog
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setView(customView); // Set the view of the dialog to your custom layout
-        //builder.setTitle("Select start and end date");
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-                detailsURL = "";
-
-            }
-        });
-
-        // Create and show the dialog
-        TextView tView = (TextView) customView.findViewById(R.id.calendar_details_name);
-        tView.setText(detailsName);
-        tView = (TextView) customView.findViewById(R.id.calendar_details_info);
-        tView.setMovementMethod(new ScrollingMovementMethod());
-        tView.setText(detailsInfo);
-        tView = (TextView) customView.findViewById(R.id.calendar_details_description);
-        tView.setMovementMethod(new ScrollingMovementMethod());
-        tView.setText(detailsDescription);
-        builder.create().show();
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -366,6 +361,9 @@ public class NewCalendarActivity extends ActionBarCastActivity {
                 }
 
             }
+            else{
+                Toast.makeText(getApplicationContext(), "Calendar Information Unavailable", Toast.LENGTH_LONG).show();
+            }
 
 
             lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -384,32 +382,33 @@ public class NewCalendarActivity extends ActionBarCastActivity {
 
                 }
             });
-            if (catalogUnavailableError) {
-                Toast.makeText(getApplicationContext(), "Catalog Information Unavailable", Toast.LENGTH_LONG).show();
-            }
             mProgressDialog.dismiss();
         }
     }
 
     private void doCalSearch() throws Exception {
         String url1 = "http://events.cmclibrary.org/eventcalendar.asp";
-
+        Log.e("HTTP", "1");
         String USER_AGENT = "Chrome/43.0.2357.134";
         CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
         URL obj1 = new URL(url1);
         HttpURLConnection.setFollowRedirects(true);
+        Log.e("HTTP", "2");
 
         //Make a connection to get cookies
-        if (searchPage == 1) {
+        if (firstCalendarSearch) {
             HttpURLConnection con = (HttpURLConnection) obj1.openConnection();
             con.setRequestMethod("GET");
             con.setRequestProperty("User-Agent", USER_AGENT);
             Map<String, List<String>> headerFields = con.getHeaderFields();
+            con.setConnectTimeout(1000);
+            firstCalendarSearch = false;
 
         }
-
+        Log.e("HTTP", "3");
         //Open the real connection
         HttpURLConnection con1 = (HttpURLConnection) obj1.openConnection();
+        Log.e("HTTP", "4");
         con1.setRequestProperty("CSP", "active");
         con1.setRequestProperty("Accept", "*/*");
         con1.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
@@ -417,6 +416,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         con1.setDoInput(true);
         con1.setDoOutput(true);
         con1.setChunkedStreamingMode(0);
+        con1.setConnectTimeout(1000);
         String searchbyString = "";
         if( (search_byAll == null) || (search_byAll.isChecked()) ){
             searchbyString = "&AllLibs=" + URLEncoder.encode("ALL", "UTF-8")+
@@ -462,7 +462,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         }
             String urlParameters1 =
                     "DispType=" + URLEncoder.encode("list", "UTF-8") +
-                            //"perPageDispTracker=" +URLEncoder.encode("25", "UTF-8")+
+                            //"perPageDispTracker=" +URLEncoder.encode("10", "UTF-8")+
                             "&date_type=" + URLEncoder.encode("range", "UTF-8") +
                             "&dr1Month=" + URLEncoder.encode(Integer.toString(startMonth), "UTF-8") +
                             "&dr1Day=" + URLEncoder.encode(Integer.toString(startDay), "UTF-8") +
@@ -483,6 +483,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
                             "&keyword=" + URLEncoder.encode(searchresults, "UTF-8")+ searchbyString;
 
         con1.setRequestMethod("POST");
+        Log.e("HTTP", "5");
 
             //Send request
             DataOutputStream wr = new DataOutputStream(
@@ -495,6 +496,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
             }
             wr.flush();
             wr.close();
+        Log.e("HTTP", "6");
 
             BufferedReader in1 = new BufferedReader(
                     new InputStreamReader(con1.getInputStream()));
@@ -506,6 +508,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
             }
             in1.close();
             String str = response1.toString();
+        Log.e("HTTP", "7");
 
             HtmlCleaner cleaner = new HtmlCleaner();
             CleanerProperties props = cleaner.getProperties();
@@ -517,6 +520,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
             //HTML page root node
             TagNode root = cleaner.clean(str);
             cleaner.getInnerHtml(root);
+        Log.e("HTTP", "8");
 
             String html = "<" + root.getName() + ">" + cleaner.getInnerHtml(root) + "</" + root.getName() + ">";
             InputSource source = new InputSource(new StringReader(html));
@@ -526,10 +530,14 @@ public class NewCalendarActivity extends ActionBarCastActivity {
 
             XPathFactory xpathFactory = XPathFactory.newInstance();
             XPath xpath = xpathFactory.newXPath();
+        Log.e("HTTP", "8A");
             Node testNode1 = (Node) xpath.evaluate("//div[@id = 'divBody']", document, XPathConstants.NODE);
-            NodeList testNode = (NodeList) xpath.evaluate(".//table[@class = 'event']/tbody/tr[2]", testNode1, XPathConstants.NODESET);
-            for (int index = 0; index < testNode.getLength(); index++) {
-                Node anode = testNode.item(index);
+        Log.e("HTTP", "8B");
+        NodeList testNode = (NodeList) xpath.evaluate(".//table[@class = 'event']/tbody/tr[2]", testNode1, XPathConstants.NODESET);
+        Log.e("HTTP", "8C");
+        for (int index = 0; index < testNode.getLength(); index++) {
+            Log.e("HTTP", "8X");
+            Node anode = testNode.item(index);
                 //Node tNode = (Node)xpath.evaluate(".//td[@class = 'event_values']", anode, XPathConstants.NODE);
                 Node subNode = (Node) xpath.evaluate(".//span[@class='event_title_list_special_class']", anode, XPathConstants.NODE);
                 String testName = xpath.evaluate(".", subNode);
@@ -555,6 +563,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
                     PicturesArray.add(testPic);
                 }
             }
+        Log.e("HTTP", "9");
 
         }
     private void doDetailSearch() throws Exception {
@@ -604,7 +613,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         XPathFactory xpathFactory = XPathFactory.newInstance();
         XPath xpath = xpathFactory.newXPath();
         Node testNode1 = (Node) xpath.evaluate("//html/body/div[3]/table/tbody/tr[2]/td", document, XPathConstants.NODE);
-        detailsName = xpath.evaluate(".", testNode1);
+        detailsName = xpath.evaluate(".", testNode1).trim();
         testNode1 = (Node) xpath.evaluate("/html/body/div[3]/table/tbody/tr[4]/td/b[1]", document, XPathConstants.NODE);
         detailsInfo = xpath.evaluate(".", testNode1);
         testNode1 = (Node) xpath.evaluate("/html/body/div[3]/table/tbody/tr[4]/td/text()[preceding-sibling::b[1]]", document, XPathConstants.NODE);
@@ -626,9 +635,9 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         testNode1 = (Node) xpath.evaluate("/html/body/div[3]/table/tbody/tr[4]/td/text()[preceding-sibling::b[5]]", document, XPathConstants.NODE);
         detailsInfo += " " + xpath.evaluate(".", testNode1) + "\r\n";
         testNode1 = (Node) xpath.evaluate("/html/body/div[3]/table/tbody/tr[4]/td/div[2]/text()[1]", document, XPathConstants.NODE);
-        detailsDescription = xpath.evaluate(".", testNode1) + "\r\n";
+        detailsDescription = xpath.evaluate(".", testNode1).trim() + " ";
         testNode1 = (Node) xpath.evaluate("/html/body/div[3]/table/tbody/tr[4]/td/div[2]/text()[2]", document, XPathConstants.NODE);
-        detailsDescription += xpath.evaluate(".", testNode1);
+        detailsDescription += xpath.evaluate(".", testNode1).trim();
     }
 
     }

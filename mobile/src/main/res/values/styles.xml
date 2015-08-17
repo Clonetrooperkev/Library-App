@@ -21,10 +21,14 @@
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowContentTransitions">true</item>
-
-        <item name="colorPrimary">#ffff5722</item>
-        <item name="colorPrimaryDark">#ffbf360c</item>
-        <item name="colorAccent">#ffff5722</item>
+<!--
+#ffff5722
+#ffbf360c
+#ffff5722
+-->
+        <item name="colorPrimary">@color/blue</item>
+        <item name="colorPrimaryDark">@color/white</item>
+        <item name="colorAccent">@color/black</item>
     </style>
 
 

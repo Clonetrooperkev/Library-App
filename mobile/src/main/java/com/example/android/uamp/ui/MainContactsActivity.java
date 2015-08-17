@@ -1,20 +1,4 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.example.android.uamp.ui;
-
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -60,12 +44,13 @@ public class MainContactsActivity extends ActionBarCastActivity {
     private String detailsArray;
     private Parcelable state = null;
     private ProgressDialog mProgressDialog;
-    private boolean contactsUnavailableError;
     private boolean firstContactSearch;
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        //detailsURL controls the state of the activity
+        //If detailsURL is not blank, perform a detail search
         detailsURL = "";
-        contactsUnavailableError = false;
+
         firstContactSearch = false;
         super.onCreate(savedInstanceState);
         handleIntent(getIntent());
@@ -83,7 +68,6 @@ public class MainContactsActivity extends ActionBarCastActivity {
             if(extras.containsKey("DETAILS")){
                 detailsURL = "http://www.cmclibrary.org/" + urlArray.get(extras.getInt("DETAILS"));
             }
-
         }
             if(detailsURL.equals("")){
                 setContentView(R.layout.activity_contacts);
@@ -114,7 +98,6 @@ public class MainContactsActivity extends ActionBarCastActivity {
 
             }
         });
-
         // Create and show the dialog
         TextView tView = (TextView) customView.findViewById(R.id.contact_details);
         tView.setMovementMethod(new ScrollingMovementMethod());
@@ -140,8 +123,6 @@ public class MainContactsActivity extends ActionBarCastActivity {
 
         @Override
         protected Void doInBackground(Void... params) {
-
-
             try {
                 if(detailsURL.equals("")){
                     doContactSearch();
@@ -181,10 +162,9 @@ public class MainContactsActivity extends ActionBarCastActivity {
                         subIntent.putExtra("DETAILS", position);
                         startActivity(subIntent, extras);
                     }
-
                 }
             });
-            if (contactsUnavailableError) {
+            if (contactsArray.size() == 0) {
                 Toast.makeText(getApplicationContext(), "Contact Information Unavailable", Toast.LENGTH_LONG).show();
             }
             mProgressDialog.dismiss();
