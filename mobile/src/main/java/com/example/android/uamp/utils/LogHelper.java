@@ -25,7 +25,7 @@ public class LogHelper {
     private static final int LOG_PREFIX_LENGTH = LOG_PREFIX.length();
     private static final int MAX_LOG_TAG_LENGTH = 23;
 
-    public static String makeLogTag(String str) {
+    private static String makeLogTag(String str) {
         if (str.length() > MAX_LOG_TAG_LENGTH - LOG_PREFIX_LENGTH) {
             return LOG_PREFIX + str.substring(0, MAX_LOG_TAG_LENGTH - LOG_PREFIX_LENGTH - 1);
         }
@@ -41,10 +41,10 @@ public class LogHelper {
     }
 
 
-    public static void v(String tag, Object... messages) {
+    public static void v(Object... messages) {
         // Only log VERBOSE if build type is DEBUG
         if (BuildConfig.DEBUG) {
-            log(tag, Log.VERBOSE, null, messages);
+            log(com.example.android.uamp.PackageValidator.TAG, Log.VERBOSE, null, messages);
         }
     }
 
@@ -55,16 +55,16 @@ public class LogHelper {
         }
     }
 
-    public static void i(String tag, Object... messages) {
-        log(tag, Log.INFO, null, messages);
+    public static void i(Object... messages) {
+        log(com.example.android.uamp.PackageValidator.TAG, Log.INFO, null, messages);
     }
 
     public static void w(String tag, Object... messages) {
         log(tag, Log.WARN, null, messages);
     }
 
-    public static void w(String tag, Throwable t, Object... messages) {
-        log(tag, Log.WARN, t, messages);
+    public static void w(Throwable t, Object... messages) {
+        log(com.example.android.uamp.PackageValidator.TAG, Log.WARN, t, messages);
     }
 
     public static void e(String tag, Object... messages) {
@@ -75,7 +75,7 @@ public class LogHelper {
         log(tag, Log.ERROR, t, messages);
     }
 
-    public static void log(String tag, int level, Throwable t, Object... messages) {
+    private static void log(String tag, int level, Throwable t, Object... messages) {
         if (Log.isLoggable(tag, level)) {
             String message;
             if (t == null && messages != null && messages.length == 1) {

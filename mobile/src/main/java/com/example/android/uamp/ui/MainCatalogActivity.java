@@ -5,28 +5,22 @@ import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -40,9 +34,6 @@ import com.example.android.uamp.utils.LogHelper;
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.TagNode;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -57,11 +48,9 @@ import java.net.CookiePolicy;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -74,45 +63,45 @@ import javax.xml.xpath.XPathFactory;
  * are in the navigation drawer.
  */
 public class MainCatalogActivity extends ActionBarCastActivity{
-    String detailsURL = "";
-    String detailsTitle;
+    private String detailsURL = "";
+    private String detailsTitle;
     String detailsSummary;
-    String detailsAvailability= "";
-    ListView lv;
-    Parcelable state = null;
-    boolean firstDetailSearch;
+    private String detailsAvailability= "";
+    private ListView lv;
+    private Parcelable state = null;
+    private boolean firstDetailSearch;
     //private Context context = null;
     private static final String TAG = LogHelper.makeLogTag(MainCatalogActivity.class);
-    public String searchresults = "a";
-    List<String> CatalogDetailsURLArray = new ArrayList<String>();
-    List<String> CatalogArray = new ArrayList<String>();
-    List<String> AuthorArray = new ArrayList<String>();
-    List<String> FormatArray = new ArrayList<String>();
-    List<String> PicturesArray = new ArrayList<String>();
+    private String searchresults = "a";
+    private List<String> CatalogDetailsURLArray = new ArrayList<String>();
+    private List<String> CatalogArray = new ArrayList<String>();
+    private List<String> AuthorArray = new ArrayList<String>();
+    private List<String> FormatArray = new ArrayList<String>();
+    private List<String> PicturesArray = new ArrayList<String>();
     List<String> urlArray = new ArrayList<String>();
     ListView listview;
     ArrayAdapter adapter;
-    ProgressDialog mProgressDialog;
-    boolean catalogUnavailableError;
-    MenuItem searchby_any_MenuItem;
-    MenuItem searchby_author_MenuItem;
-    MenuItem searchby_ISBN_MenuItem;
-    MenuItem searchby_title_MenuItem;
-    MenuItem format_any_MenuItem;
-    MenuItem format_book_MenuItem;
-    MenuItem format_large_print_MenuItem;
-    MenuItem format_audiobook_MenuItem;
-    MenuItem format_audio_ebook_MenuItem;
-    MenuItem format_ebook_MenuItem;
-    MenuItem format_dvd_MenuItem;
-    MenuItem format_Bray_disc_MenuItem;
-    MenuItem format_videotape_MenuItem;
-    MenuItem format_music_cd_MenuItem;
-    MenuItem format_sound_recording_MenuItem;
-    MenuItem format_serial_MenuItem;
-    SearchView searchView;
-    View footerView;
-    int searchPage;
+    private ProgressDialog mProgressDialog;
+    private boolean catalogUnavailableError;
+    private MenuItem searchby_any_MenuItem;
+    private MenuItem searchby_author_MenuItem;
+    private MenuItem searchby_ISBN_MenuItem;
+    private MenuItem searchby_title_MenuItem;
+    private MenuItem format_any_MenuItem;
+    private MenuItem format_book_MenuItem;
+    private MenuItem format_large_print_MenuItem;
+    private MenuItem format_audiobook_MenuItem;
+    private MenuItem format_audio_ebook_MenuItem;
+    private MenuItem format_ebook_MenuItem;
+    private MenuItem format_dvd_MenuItem;
+    private MenuItem format_Bray_disc_MenuItem;
+    private MenuItem format_videotape_MenuItem;
+    private MenuItem format_music_cd_MenuItem;
+    private MenuItem format_sound_recording_MenuItem;
+    private MenuItem format_serial_MenuItem;
+    private SearchView searchView;
+    private View footerView;
+    private int searchPage;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         firstDetailSearch = true;
@@ -125,7 +114,7 @@ public class MainCatalogActivity extends ActionBarCastActivity{
         SharedPreferences settings = getSharedPreferences("settings", 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.clear();
-        editor.commit();
+        editor.apply();
         handleIntent(getIntent());
 
     }
@@ -136,7 +125,7 @@ public class MainCatalogActivity extends ActionBarCastActivity{
         handleIntent(intent);
     }
 
-    public void handleIntent(Intent intent) {
+    private void handleIntent(Intent intent) {
         String tempsearchresults = "";
         String moreButton = "";
         Bundle extras = intent.getExtras();
@@ -196,7 +185,7 @@ public class MainCatalogActivity extends ActionBarCastActivity{
                 SharedPreferences settings = getSharedPreferences("settings", 0);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putInt(SelectedMenu, item.getItemId());
-                editor.commit();
+                editor.apply();
             }
             return true;
         }
@@ -299,7 +288,7 @@ public class MainCatalogActivity extends ActionBarCastActivity{
         @Override
         protected void onPostExecute(Void args) {
 
-            CatalogListAdapter adapter = new CatalogListAdapter(MainCatalogActivity.this, R.layout.cataloglist_item, CatalogArray, AuthorArray, FormatArray, PicturesArray);
+            CatalogListAdapter adapter = new CatalogListAdapter(MainCatalogActivity.this, CatalogArray, AuthorArray, FormatArray, PicturesArray);
             lv = (ListView)findViewById(R.id.cataloglist);
             lv.setAdapter(adapter);
             if(state != null){
@@ -313,6 +302,7 @@ public class MainCatalogActivity extends ActionBarCastActivity{
             if(CatalogArray.size() != 0) {
                 if(footerView == null){
                     footerView = ((LayoutInflater) MainCatalogActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.footer, null, false);
+
                     lv.addFooterView(footerView);
                     Button forward = (Button) footerView.findViewById(R.id.loadMore);
                     forward.setOnClickListener(new View.OnClickListener() {
@@ -355,7 +345,7 @@ public class MainCatalogActivity extends ActionBarCastActivity{
             mProgressDialog.dismiss();
         }
     }
-    public void showDetails() {
+    private void showDetails() {
         // Inflate your custom layout containing 2 DatePickers
         LayoutInflater inflater = (LayoutInflater) getLayoutInflater();
         View customView = inflater.inflate(R.layout.catalog_details, null);
@@ -381,7 +371,7 @@ public class MainCatalogActivity extends ActionBarCastActivity{
         tView.setText(detailsAvailability);
         builder.create().show();
     }
-    public void doBookSearch() throws Exception {
+    private void doBookSearch() throws Exception {
         String Qurl = "http://cat.cmclibrary.org/polaris/search/searchresults.aspx?ctx=1.1033.0.0.3&type=Keyword&term=";
         //String bookSort = "&limit=TOM=bks";
         if (searchresults == ""){
@@ -532,12 +522,12 @@ public class MainCatalogActivity extends ActionBarCastActivity{
         }
 
     }
-    public void doDetailSearch() throws Exception {
+    private void doDetailSearch() throws Exception {
         String USER_AGENT = "Chrome/43.0.2357.134";
         URL obj1 = new URL(detailsURL);
         HttpURLConnection.setFollowRedirects(true);
         //Get session ID if necessary
-        if(firstDetailSearch == true) {
+        if(firstDetailSearch) {
             HttpURLConnection conx = (HttpURLConnection) obj1.openConnection();
             conx.setRequestProperty("CSP", "active");
             conx.setRequestProperty("Accept", "*/*");

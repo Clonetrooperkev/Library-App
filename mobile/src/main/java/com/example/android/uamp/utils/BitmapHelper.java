@@ -37,7 +37,7 @@ public class BitmapHelper {
             (int) (src.getWidth() * scaleFactor), (int) (src.getHeight() * scaleFactor), false);
     }
 
-    public static Bitmap scaleBitmap(int scaleFactor, InputStream is) {
+    private static Bitmap scaleBitmap(int scaleFactor, InputStream is) {
         // Get the dimensions of the bitmap
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
 
@@ -48,7 +48,7 @@ public class BitmapHelper {
         return BitmapFactory.decodeStream(is, null, bmOptions);
     }
 
-    public static int findScaleFactor(int targetW, int targetH, InputStream is) {
+    private static int findScaleFactor(int targetW, int targetH, InputStream is) {
         // Get the dimensions of the bitmap
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
         bmOptions.inJustDecodeBounds = true;

@@ -17,18 +17,18 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CatalogListAdapter extends ArrayAdapter<String> {
+class CatalogListAdapter extends ArrayAdapter<String> {
     private final Context context;
-    int layoutResourceId;
-    List<String> title;
-    List<String> author;
-    List<String> format;
-    List<String> picture;
+    private int layoutResourceId;
+    private List<String> title;
+    private List<String> author;
+    private List<String> format;
+    private List<String> picture;
 
 
-    public CatalogListAdapter(Context context,int layoutResourceId, List<String> titles, List<String> authors, List<String> formats, List<String> pictures) {
+    public CatalogListAdapter(Context context, List<String> titles, List<String> authors, List<String> formats, List<String> pictures) {
         super(context, -1, titles);
-        this.layoutResourceId = layoutResourceId;
+        this.layoutResourceId = R.layout.cataloglist_item;
         this.context = context;
         this.title = titles;
         this.author = authors;

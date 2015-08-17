@@ -17,18 +17,18 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CalendarListAdapter extends ArrayAdapter<String> {
+class CalendarListAdapter extends ArrayAdapter<String> {
     private final Context context;
-    int layoutResourceId;
-    List<String> title;
-    List<String> location;
-    List<String> date;
-    List<String> picture;
+    private int layoutResourceId;
+    private List<String> title;
+    private List<String> location;
+    private List<String> date;
+    private List<String> picture;
 
 
-    public CalendarListAdapter(Context context,int layoutResourceId, List<String> titles, List<String> locations, List<String> dates, List<String> pictures) {
+    public CalendarListAdapter(Context context, List<String> titles, List<String> locations, List<String> dates, List<String> pictures) {
         super(context, -1, titles);
-        this.layoutResourceId = layoutResourceId;
+        this.layoutResourceId = R.layout.calendarlist_item;
         this.context = context;
         this.title = titles;
         this.location = locations;

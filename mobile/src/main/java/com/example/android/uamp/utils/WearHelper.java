@@ -18,7 +18,7 @@ package com.example.android.uamp.utils;
 import android.os.Bundle;
 import android.support.wearable.media.MediaControlConstants;
 
-public class WearHelper {
+class WearHelper {
     private static final String WEAR_APP_PACKAGE_NAME = "com.google.android.wearable.app";
 
     public static boolean isValidWearCompanionPackage(String packageName) {

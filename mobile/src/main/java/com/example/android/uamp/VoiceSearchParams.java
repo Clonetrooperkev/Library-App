@@ -23,19 +23,19 @@ import android.text.TextUtils;
  * For more information about voice search parameters,
  * check https://developer.android.com/guide/components/intents-common.html#PlaySearch
  */
-public final class VoiceSearchParams {
+final class VoiceSearchParams {
 
-    public final String query;
-    public boolean isAny;
-    public boolean isUnstructured;
-    public boolean isGenreFocus;
-    public boolean isArtistFocus;
-    public boolean isAlbumFocus;
-    public boolean isSongFocus;
-    public String genre;
-    public String artist;
-    public String album;
-    public String song;
+    private final String query;
+    private boolean isAny;
+    private boolean isUnstructured;
+    private boolean isGenreFocus;
+    private boolean isArtistFocus;
+    private boolean isAlbumFocus;
+    private boolean isSongFocus;
+    private String genre;
+    private String artist;
+    private String album;
+    private String song;
 
     /**
      * Creates a simple object describing the search criteria from the query and extras.

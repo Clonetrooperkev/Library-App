@@ -68,7 +68,7 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
-    public DrawerMenuContents mDrawerMenuContents;
+    DrawerMenuContents mDrawerMenuContents;
 
     private boolean mToolbarInitialized;
 
@@ -261,7 +261,7 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
         mToolbar.setTitle(titleId);
     }
 
-    protected void initializeToolbar() {
+    void initializeToolbar() {
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         if (mToolbar == null) {
             throw new IllegalStateException("Layout is required to include a Toolbar with id " +
@@ -328,7 +328,7 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
         mDrawerList.setAdapter(adapter);
     }
 
-    protected void updateDrawerToggle() {
+    private void updateDrawerToggle() {
         if (mDrawerToggle == null) {
             return;
         }

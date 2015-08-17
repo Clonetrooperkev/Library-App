@@ -23,17 +23,17 @@ import java.util.Arrays;
 /**
  * Utility class to help on queue related tasks.
  */
-public class MediaIDHelper {
+class MediaIDHelper {
 
     // Media IDs used on browseable items of MediaBrowser
-    public static final String MEDIA_ID_ROOT = "__ROOT__";
+    private static final String MEDIA_ID_ROOT = "__ROOT__";
     public static final String MEDIA_ID_MUSICS_BY_GENRE = "__BY_GENRE__";
     public static final String MEDIA_ID_MUSICS_BY_SEARCH = "__BY_SEARCH__";
 
     private static final char CATEGORY_SEPARATOR = '/';
     private static final char LEAF_SEPARATOR = '|';
 
-    public static String createMediaID(String musicID, String... categories) {
+    private static String createMediaID(String musicID, String... categories) {
         // MediaIDs are of the form <categoryType>/<categoryValue>|<musicUniqueId>, to make it easy
         // to find the category (like genre) that a music was selected from, so we
         // can correctly build the playing queue. This is specially useful when
@@ -81,7 +81,7 @@ public class MediaIDHelper {
      *
      * @param mediaID that contains a category and categoryValue.
      */
-    public static @NonNull String[] getHierarchy(String mediaID) {
+    private static @NonNull String[] getHierarchy(String mediaID) {
         int pos = mediaID.indexOf(LEAF_SEPARATOR);
         if (pos >= 0) {
             mediaID = mediaID.substring(0, pos);

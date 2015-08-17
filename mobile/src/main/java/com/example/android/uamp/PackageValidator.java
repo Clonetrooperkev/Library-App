@@ -39,7 +39,7 @@ import java.util.Map;
  * res/xml/allowed_media_browser_callers.xml.
  */
 public class PackageValidator {
-    private static final String TAG = LogHelper.makeLogTag(PackageValidator.class);
+    public static final String TAG = LogHelper.makeLogTag(PackageValidator.class);
 
     /**
      * Map allowed callers' certificate keys to the expected caller information.
@@ -47,7 +47,7 @@ public class PackageValidator {
      */
     private final Map<String, ArrayList<CallerInfo>> mValidCertificates;
 
-    public PackageValidator(Context ctx) {
+    private PackageValidator(Context ctx) {
         mValidCertificates = readValidCertificates(ctx.getResources().getXml(
             R.xml.allowed_media_browser_callers));
     }
@@ -72,7 +72,7 @@ public class PackageValidator {
                         infos = new ArrayList<>();
                         validCertificates.put(certificate, infos);
                     }
-                    LogHelper.v(TAG, "Adding allowed caller: ", info.name,
+                    LogHelper.v("Adding allowed caller: ", info.name,
                         " package=", info.packageName, " release=", info.release,
                         " certificate=", certificate);
                     infos.add(info);
@@ -100,7 +100,7 @@ public class PackageValidator {
             packageInfo = packageManager.getPackageInfo(
                     callingPackage, PackageManager.GET_SIGNATURES);
         } catch (PackageManager.NameNotFoundException e) {
-            LogHelper.w(TAG, e, "Package manager can't find package: ", callingPackage);
+            LogHelper.w(e, "Package manager can't find package: ", callingPackage);
             return false;
         }
         if (packageInfo.signatures.length != 1) {
@@ -113,7 +113,7 @@ public class PackageValidator {
         // Test for known signatures:
         ArrayList<CallerInfo> validCallers = mValidCertificates.get(signature);
         if (validCallers == null) {
-            LogHelper.v(TAG, "Signature for caller ", callingPackage, " is not valid: \n"
+            LogHelper.v("Signature for caller ", callingPackage, " is not valid: \n"
                 , signature);
             if (mValidCertificates.isEmpty()) {
                 LogHelper.w(TAG, "The list of valid certificates is empty. Either your file ",
@@ -127,14 +127,14 @@ public class PackageValidator {
         StringBuffer expectedPackages = new StringBuffer();
         for (CallerInfo info: validCallers) {
             if (callingPackage.equals(info.packageName)) {
-                LogHelper.v(TAG, "Valid caller: ", info.name, "  package=", info.packageName,
+                LogHelper.v("Valid caller: ", info.name, "  package=", info.packageName,
                     " release=", info.release);
                 return true;
             }
             expectedPackages.append(info.packageName).append(' ');
         }
 
-        LogHelper.i(TAG, "Caller has a valid certificate, but its package doesn't match any ",
+        LogHelper.i("Caller has a valid certificate, but its package doesn't match any ",
             "expected package for the given certificate. Caller's package is ", callingPackage,
             ". Expected packages as defined in res/xml/allowed_media_browser_callers.xml are (",
             expectedPackages, "). This caller's certificate is: \n", signature);

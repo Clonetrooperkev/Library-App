@@ -2,7 +2,6 @@
 package com.example.android.uamp.ui;
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
@@ -62,55 +61,55 @@ import javax.xml.xpath.XPathFactory;
  * are in the navigation drawer.
  */
 public class NewCalendarActivity extends ActionBarCastActivity {
-    String detailsURL = "";
+    private String detailsURL = "";
     private static final int DATE_DIALOG_ID = 1;
     public int year;
     public int month;
     public int day;
     EditText txtDate;
-    String detailsName;
-    String detailsDescription;
-    String detailsInfo;
-    ListView lv;
-    Parcelable state = null;
-    public int startDay = 0;
-    public int startMonth = 0;
-    public int startYear = 0;
-    public int endDay = 0;
-    public int endMonth = 0;
-    public int endYear = 0;
+    private String detailsName;
+    private String detailsDescription;
+    private String detailsInfo;
+    private ListView lv;
+    private Parcelable state = null;
+    private int startDay = 0;
+    private int startMonth = 0;
+    private int startYear = 0;
+    private int endDay = 0;
+    private int endMonth = 0;
+    private int endYear = 0;
     //private Context context = null;
     private static final String TAG = LogHelper.makeLogTag(MainCatalogActivity.class);
-    public String searchresults = "a";
-    List<String> CalendarNameArray = new ArrayList<String>();
-    List<String> CalendarDetailsURLArray = new ArrayList<String>();
-    List<String> LocationArray = new ArrayList<String>();
-    List<String> DateArray = new ArrayList<String>();
-    List<String> PicturesArray = new ArrayList<String>();
+    private String searchresults = "a";
+    private List<String> CalendarNameArray = new ArrayList<String>();
+    private List<String> CalendarDetailsURLArray = new ArrayList<String>();
+    private List<String> LocationArray = new ArrayList<String>();
+    private List<String> DateArray = new ArrayList<String>();
+    private List<String> PicturesArray = new ArrayList<String>();
     List<String> urlArray = new ArrayList<String>();
     ListView listview;
     ArrayAdapter adapter;
-    ProgressDialog mProgressDialog;
-    boolean catalogUnavailableError;
-    MenuItem search_byAll;
-    MenuItem menu_bookmobile;
-    MenuItem menu_cape_may_city_library;
-    MenuItem menu_cape_may_courthouse_library;
-    MenuItem menu_lower_cape_library;
-    MenuItem menu_sea_isle_city_library;
-    MenuItem menu_stone_harbor;
-    MenuItem menu_upper_cape_library;
-    MenuItem menu_wildwood_crest_library;
-    MenuItem menu_woodbine_library;
+    private ProgressDialog mProgressDialog;
+    private boolean catalogUnavailableError;
+    private MenuItem search_byAll;
+    private MenuItem menu_bookmobile;
+    private MenuItem menu_cape_may_city_library;
+    private MenuItem menu_cape_may_courthouse_library;
+    private MenuItem menu_lower_cape_library;
+    private MenuItem menu_sea_isle_city_library;
+    private MenuItem menu_stone_harbor;
+    private MenuItem menu_upper_cape_library;
+    private MenuItem menu_wildwood_crest_library;
+    private MenuItem menu_woodbine_library;
     MenuItem format_dvd_MenuItem;
     MenuItem format_Bray_disc_MenuItem;
     MenuItem format_videotape_MenuItem;
     MenuItem format_music_cd_MenuItem;
     MenuItem format_sound_recording_MenuItem;
     MenuItem format_serial_MenuItem;
-    SearchView searchView;
-    View footerView;
-    int searchPage;
+    private SearchView searchView;
+    private View footerView;
+    private int searchPage;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -132,7 +131,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         SharedPreferences settings = getSharedPreferences("settings", 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.clear();
-        editor.commit();
+        editor.apply();
         handleIntent(getIntent());
 
     }
@@ -144,7 +143,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         handleIntent(intent);
     }
 
-    public void handleIntent(Intent intent) {
+    private void handleIntent(Intent intent) {
         String tempsearchresults = "";
         String moreButton = "";
 
@@ -199,7 +198,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
                 SharedPreferences settings = getSharedPreferences("settings", 0);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putInt("Selected_Library", item.getItemId());
-                editor.commit();
+                editor.apply();
             }
             Bundle extras = ActivityOptions.makeCustomAnimation(
                     NewCalendarActivity.this, R.anim.fade_in, R.anim.fade_out).toBundle();
@@ -212,7 +211,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void showDatePicker() {
+    private void showDatePicker() {
         // Inflate your custom layout containing 2 DatePickers
         LayoutInflater inflater = (LayoutInflater) getLayoutInflater();
         View customView = inflater.inflate(R.layout.calendar_datepicker, null);
@@ -249,7 +248,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         builder.create().show();
     }
 
-    public void showDetails() {
+    private void showDetails() {
         // Inflate your custom layout containing 2 DatePickers
         LayoutInflater inflater = (LayoutInflater) getLayoutInflater();
         View customView = inflater.inflate(R.layout.calendar_details, null);
@@ -355,7 +354,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         @Override
         protected void onPostExecute(Void args) {
 
-            CalendarListAdapter adapter = new CalendarListAdapter(NewCalendarActivity.this, R.layout.calendarlist_item, CalendarNameArray, LocationArray, DateArray, PicturesArray);
+            CalendarListAdapter adapter = new CalendarListAdapter(NewCalendarActivity.this, CalendarNameArray, LocationArray, DateArray, PicturesArray);
             lv = (ListView) findViewById(R.id.calendarlist);
             lv.setAdapter(adapter);
             if (state != null) {
@@ -409,7 +408,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         }
     }
 
-    public void doCalSearch() throws Exception {
+    private void doCalSearch() throws Exception {
         String url1 = "http://events.cmclibrary.org/eventcalendar.asp";
 
         String USER_AGENT = "Chrome/43.0.2357.134";
@@ -575,7 +574,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
             }
 
         }
-    public void doDetailSearch() throws Exception {
+    private void doDetailSearch() throws Exception {
         String USER_AGENT = "Chrome/43.0.2357.134";
         URL obj1 = new URL(detailsURL);
         HttpURLConnection.setFollowRedirects(true);

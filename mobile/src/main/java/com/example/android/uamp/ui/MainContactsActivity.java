@@ -69,15 +69,15 @@ import javax.xml.xpath.XPathFactory;
 
 public class MainContactsActivity extends ActionBarCastActivity {
     private static final String TAG = LogHelper.makeLogTag(MainContactsActivity.class);
-    List<String> contactsArray = new ArrayList<String>();
-    List<String> urlArray = new ArrayList<String>();
-    ListView lv;
-    String detailsURL;
-    String detailsArray;
-    Parcelable state = null;
-    ProgressDialog mProgressDialog;
-    boolean contactsUnavailableError;
-    boolean firstContactSearch;
+    private List<String> contactsArray = new ArrayList<String>();
+    private List<String> urlArray = new ArrayList<String>();
+    private ListView lv;
+    private String detailsURL;
+    private String detailsArray;
+    private Parcelable state = null;
+    private ProgressDialog mProgressDialog;
+    private boolean contactsUnavailableError;
+    private boolean firstContactSearch;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         detailsURL = "";
@@ -93,7 +93,7 @@ public class MainContactsActivity extends ActionBarCastActivity {
         handleIntent(intent);
     }
 
-    public void handleIntent(Intent intent) {
+    private void handleIntent(Intent intent) {
         Bundle extras = intent.getExtras();
         if (extras != null) {
             if(extras.containsKey("DETAILS")){
@@ -114,7 +114,7 @@ public class MainContactsActivity extends ActionBarCastActivity {
 
         new DownloadJSON().execute();
     }
-    public void showDetails() {
+    private void showDetails() {
         LayoutInflater inflater = (LayoutInflater) getLayoutInflater();
         View customView = inflater.inflate(R.layout.contact_details, null);
 
@@ -207,13 +207,13 @@ public class MainContactsActivity extends ActionBarCastActivity {
         }
     }
 
-    public void doContactSearch() throws Exception {
+    private void doContactSearch() throws Exception {
         String url = "http://www.cmclibrary.org/about-the-library/contact-us";
         String USER_AGENT = "Chrome/43.0.2357.134";
         URL obj1 = new URL(url);
         HttpURLConnection.setFollowRedirects(true);
         //Get session ID if necessary
-        if(firstContactSearch == true) {
+        if(firstContactSearch) {
             HttpURLConnection conx = (HttpURLConnection) obj1.openConnection();
             conx.setRequestProperty("CSP", "active");
             conx.setRequestProperty("Accept", "*/*");
@@ -283,7 +283,7 @@ public class MainContactsActivity extends ActionBarCastActivity {
 
         }
     }
-    public void doDetailSearch()throws Exception{
+    private void doDetailSearch()throws Exception{
         detailsArray = "";
         if(detailsURL.equals("http://www.cmclibrary.org/Library Branches")){
             detailsArray = "Main Branch"+ "\r\n";
@@ -309,7 +309,7 @@ public class MainContactsActivity extends ActionBarCastActivity {
             URL obj1 = new URL(detailsURL);
             HttpURLConnection.setFollowRedirects(true);
             //Get session ID if necessary
-            if(firstContactSearch == true) {
+            if(firstContactSearch) {
                 HttpURLConnection conx = (HttpURLConnection) obj1.openConnection();
                 conx.setRequestProperty("CSP", "active");
                 conx.setRequestProperty("Accept", "*/*");

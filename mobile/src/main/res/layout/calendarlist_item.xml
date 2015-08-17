@@ -22,7 +22,6 @@
         android:layout_toRightOf="@+id/calImage"
         android:layout_alignTop="@+id/calImage"
         android:textColor="@color/black"
-        android:text = "Library Releases Awesome App"
         android:minLines="1"
         android:maxLines="2"
         />
@@ -32,7 +31,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="10sp"
-        android:text = "Cape May County Library"
         android:layout_below="@+id/calendar_name"
         android:layout_weight="1"
         android:ellipsize="none"
@@ -46,7 +44,6 @@
         android:layout_height="wrap_content"
         android:textSize="10sp"
         android:textColor="@color/dark_grey"
-        android:text = "September 15,2015"
         android:layout_weight="1"
         android:layout_below="@+id/calendar_name"
         android:layout_alignParentRight="true"
