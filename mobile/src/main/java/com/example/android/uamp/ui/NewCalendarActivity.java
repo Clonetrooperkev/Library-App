@@ -28,7 +28,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.example.android.uamp.R;
-import com.example.android.uamp.utils.LogHelper;
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.TagNode;
@@ -79,7 +78,6 @@ public class NewCalendarActivity extends ActionBarCastActivity {
     private int endMonth = 0;
     private int endYear = 0;
     //private Context context = null;
-    private static final String TAG = LogHelper.makeLogTag(MainCatalogActivity.class);
     private String searchresults = "a";
     private List<String> CalendarNameArray = new ArrayList<String>();
     private List<String> CalendarDetailsURLArray = new ArrayList<String>();
@@ -124,7 +122,6 @@ public class NewCalendarActivity extends ActionBarCastActivity {
         }
 
         catalogUnavailableError = false;
-        LogHelper.w(TAG, "Testing Joe");
         super.onCreate(savedInstanceState);
 
         //Every time catalog is entered: set "searchbyAll" to "any"
@@ -345,7 +342,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
                 }
 
             } catch (Exception e) {
-                LogHelper.e(TAG, e, "Things be wacky");
+                //LogHelper.e(TAG, e, "Things be wacky");
             }
 
             return null;

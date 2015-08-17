@@ -29,7 +29,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.uamp.R;
-import com.example.android.uamp.utils.LogHelper;
 
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.HtmlCleaner;
@@ -71,7 +70,6 @@ public class MainCatalogActivity extends ActionBarCastActivity{
     private Parcelable state = null;
     private boolean firstDetailSearch;
     //private Context context = null;
-    private static final String TAG = LogHelper.makeLogTag(MainCatalogActivity.class);
     private String searchresults = "a";
     private List<String> CatalogDetailsURLArray = new ArrayList<String>();
     private List<String> CatalogArray = new ArrayList<String>();
@@ -107,7 +105,6 @@ public class MainCatalogActivity extends ActionBarCastActivity{
         firstDetailSearch = true;
         detailsURL = "";
         catalogUnavailableError = false;
-        LogHelper.w(TAG, "Testing Joe");
         super.onCreate(savedInstanceState);
 
         //Every time catalog is entered: set "search by" and "format" to "any"
@@ -279,7 +276,7 @@ public class MainCatalogActivity extends ActionBarCastActivity{
                 }
             }
             catch(Exception e){
-                LogHelper.e(TAG,e,"Things be wacky");
+                //LogHelper.e(TAG,e,"Things be wacky");
             }
 
             return null;

@@ -38,7 +38,6 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
 import com.example.android.uamp.R;
-import com.example.android.uamp.utils.LogHelper;
 import com.example.android.uamp.utils.PrefUtils;
 import com.example.android.uamp.utils.ResourceHelper;
 import com.github.amlcurran.showcaseview.ShowcaseView;
@@ -58,8 +57,6 @@ import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCa
  */
 public abstract class ActionBarCastActivity extends AppCompatActivity {
 
-    private static final String TAG = LogHelper.makeLogTag(ActionBarCastActivity.class);
-
     private static final int DELAY_MILLIS = 1000;
 
     //private VideoCastManager mCastManager;
@@ -78,12 +75,10 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
 
         @Override
         public void onFailed(int resourceId, int statusCode) {
-            LogHelper.d(TAG, "onFailed ", resourceId, " status ", statusCode);
         }
 
         @Override
         public void onConnectionSuspended(int cause) {
-            LogHelper.d(TAG, "onConnectionSuspended() was called with cause: ", cause);
         }
 
         @Override
@@ -98,13 +93,11 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
                 // show an overlay that explains what that button means.
                 PrefUtils.setFtuShown(ActionBarCastActivity.this, true);
 
-                LogHelper.d(TAG, "Route is visible: ", info);
                 new Handler().postDelayed(new Runnable() {
 
                     @Override
                     public void run() {
                         if (mMediaRouteMenuItem.isVisible()) {
-                            LogHelper.d(TAG, "Cast Icon is visible: ", info.getName());
                             showFtu();
                         }
                     }
@@ -157,7 +150,6 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LogHelper.d(TAG, "Activity onCreate");
 
         // Ensure that Google Play Service is available.
        // VideoCastManager.checkGooglePlayServices(this);

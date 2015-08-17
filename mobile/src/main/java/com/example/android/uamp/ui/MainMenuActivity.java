@@ -26,18 +26,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.uamp.R;
-import com.example.android.uamp.utils.LogHelper;
 
 /**
  * Placeholder activity for features that are not implemented in this sample, but
  * are in the navigation drawer.
  */
 public class MainMenuActivity extends ActionBarCastActivity {
-    private static final String TAG = LogHelper.makeLogTag(MainMenuActivity.class);
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        LogHelper.w(TAG, "Testing Joe");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
         initializeToolbar();

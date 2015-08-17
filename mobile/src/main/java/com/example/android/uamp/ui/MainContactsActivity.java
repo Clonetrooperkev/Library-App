@@ -36,7 +36,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.uamp.R;
-import com.example.android.uamp.utils.LogHelper;
 
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.HtmlCleaner;
@@ -68,7 +67,6 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
 public class MainContactsActivity extends ActionBarCastActivity {
-    private static final String TAG = LogHelper.makeLogTag(MainContactsActivity.class);
     private List<String> contactsArray = new ArrayList<String>();
     private List<String> urlArray = new ArrayList<String>();
     private ListView lv;
@@ -167,7 +165,7 @@ public class MainContactsActivity extends ActionBarCastActivity {
                 }
             }
             catch(Exception e){
-                LogHelper.e(TAG,e,"Things be wacky");
+                //LogHelper.e(TAG,e,"Things be wacky");
             }
             return null;
         }

@@ -19,7 +19,7 @@ public class CalendarSearchActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_catalog);
+        setContentView(R.layout.activity_calendar);
 
         handleIntent(getIntent());
     }
