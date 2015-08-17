@@ -18,15 +18,12 @@ package com.example.android.uamp.ui;
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -34,32 +31,21 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.example.android.uamp.R;
-
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.TagNode;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.StringReader;
-import java.net.CookieHandler;
-import java.net.CookieManager;
-import java.net.CookiePolicy;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
@@ -67,8 +53,8 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
 public class MainContactsActivity extends ActionBarCastActivity {
-    private List<String> contactsArray = new ArrayList<String>();
-    private List<String> urlArray = new ArrayList<String>();
+    private List<String> contactsArray = new ArrayList<>();
+    private List<String> urlArray = new ArrayList<>();
     private ListView lv;
     private String detailsURL;
     private String detailsArray;
@@ -113,7 +99,7 @@ public class MainContactsActivity extends ActionBarCastActivity {
         new DownloadJSON().execute();
     }
     private void showDetails() {
-        LayoutInflater inflater = (LayoutInflater) getLayoutInflater();
+        LayoutInflater inflater = getLayoutInflater();
         View customView = inflater.inflate(R.layout.contact_details, null);
 
         // Build the dialog
@@ -172,7 +158,7 @@ public class MainContactsActivity extends ActionBarCastActivity {
 
         @Override
         protected void onPostExecute(Void args) {
-            ArrayAdapter ContactsArrayAdapter = new ArrayAdapter<String>(MainContactsActivity.this, R.layout.contactlist_item, R.id.contact_name, contactsArray);
+            ArrayAdapter ContactsArrayAdapter = new ArrayAdapter<>(MainContactsActivity.this, R.layout.contactlist_item, R.id.contact_name, contactsArray);
             lv = (ListView)findViewById(R.id.contactslist);
             lv.setAdapter(ContactsArrayAdapter);
             if(state != null){
@@ -207,7 +193,6 @@ public class MainContactsActivity extends ActionBarCastActivity {
 
     private void doContactSearch() throws Exception {
         String url = "http://www.cmclibrary.org/about-the-library/contact-us";
-        String USER_AGENT = "Chrome/43.0.2357.134";
         URL obj1 = new URL(url);
         HttpURLConnection.setFollowRedirects(true);
         //Get session ID if necessary
@@ -237,10 +222,12 @@ public class MainContactsActivity extends ActionBarCastActivity {
 
         con1.setRequestMethod("GET");
         int responseCode = con1.getResponseCode();
+        //Need to handle page not found etc...
+
         BufferedReader in1 = new BufferedReader(
                 new InputStreamReader(con1.getInputStream()));
         String inputLine1;
-        StringBuffer response1 = new StringBuffer();
+        StringBuilder response1 = new StringBuilder();
 
         while ((inputLine1 = in1.readLine()) != null) {
             response1.append(inputLine1);
@@ -268,7 +255,6 @@ public class MainContactsActivity extends ActionBarCastActivity {
         XPathFactory xpathFactory = XPathFactory.newInstance();
         XPath xpath = xpathFactory.newXPath();
         NodeList testNode = (NodeList)xpath.evaluate("//span[@class='item-title']", document, XPathConstants.NODESET);
-        int i = testNode.getLength();
         for (int index = 0; index < testNode.getLength(); index++) {
             Node anode = testNode.item(index);
             Node subNode = (Node)xpath.evaluate("./a", anode, XPathConstants.NODE);
@@ -303,7 +289,6 @@ public class MainContactsActivity extends ActionBarCastActivity {
 
         }
         else{
-            String USER_AGENT = "Chrome/43.0.2357.134";
             URL obj1 = new URL(detailsURL);
             HttpURLConnection.setFollowRedirects(true);
             //Get session ID if necessary
@@ -315,9 +300,10 @@ public class MainContactsActivity extends ActionBarCastActivity {
                 conx.setUseCaches(false);
                 conx.setDoInput(true);
                 conx.setChunkedStreamingMode(0);
-
                 conx.setRequestMethod("GET");
                 int responseCodex = conx.getResponseCode();
+                //Need to handle page not found etc...
+
                 BufferedReader inx = new BufferedReader(
                         new InputStreamReader(conx.getInputStream()));
                 inx.close();
@@ -330,13 +316,14 @@ public class MainContactsActivity extends ActionBarCastActivity {
             con1.setUseCaches(false);
             con1.setDoInput(true);
             con1.setChunkedStreamingMode(0);
-
             con1.setRequestMethod("GET");
             int responseCode = con1.getResponseCode();
+            //Need to handle page not found etc...
+
             BufferedReader in1 = new BufferedReader(
                     new InputStreamReader(con1.getInputStream()));
             String inputLine1;
-            StringBuffer response1 = new StringBuffer();
+            StringBuilder response1 = new StringBuilder();
 
             while ((inputLine1 = in1.readLine()) != null) {
                 response1.append(inputLine1);
@@ -365,7 +352,6 @@ public class MainContactsActivity extends ActionBarCastActivity {
             XPath xpath = xpathFactory.newXPath();
             NodeList testNode = (NodeList)xpath.evaluate("//td[@class='item-title']", document, XPathConstants.NODESET);
             NodeList testNode2 = (NodeList)xpath.evaluate("//td[@class='item-phone']", document, XPathConstants.NODESET);
-            int i = testNode.getLength();
             for (int index = 0; index < testNode.getLength(); index++) {
                 Node anode = testNode.item(index);
                 Node subNode = (Node)xpath.evaluate("./a", anode, XPathConstants.NODE);

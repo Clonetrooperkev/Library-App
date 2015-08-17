@@ -22,13 +22,13 @@ import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.MediaRouteButton;
 import android.support.v7.media.MediaRouter;
 import android.support.v7.widget.Toolbar;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -42,7 +42,6 @@ import com.example.android.uamp.utils.PrefUtils;
 import com.example.android.uamp.utils.ResourceHelper;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
-import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
 import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCastConsumerImpl;
 
 /**
@@ -59,7 +58,6 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
 
     private static final int DELAY_MILLIS = 1000;
 
-    //private VideoCastManager mCastManager;
     private MenuItem mMediaRouteMenuItem;
     private Toolbar mToolbar;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -227,7 +225,7 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         // If the drawer is open, back will close it
-        if (mDrawerLayout != null && mDrawerLayout.isDrawerOpen(Gravity.START)) {
+        if (mDrawerLayout != null && mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
             mDrawerLayout.closeDrawers();
             return;
         }
@@ -286,7 +284,7 @@ public abstract class ActionBarCastActivity extends AppCompatActivity {
     }
 
     private void populateDrawerItems() {
-        mDrawerMenuContents = new DrawerMenuContents(this);
+        mDrawerMenuContents = new DrawerMenuContents();
         final int selectedPosition = mDrawerMenuContents.getPosition(this.getClass());
         final int unselectedColor = Color.WHITE;
         final int selectedColor = getResources().getColor(R.color.drawer_item_selected_background);

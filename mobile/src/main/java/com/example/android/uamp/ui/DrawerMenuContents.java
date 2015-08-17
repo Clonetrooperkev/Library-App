@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 package com.example.android.uamp.ui;
-
-import android.content.Context;
-
 import com.example.android.uamp.R;
 
 import java.util.ArrayList;
@@ -31,7 +28,7 @@ public class DrawerMenuContents {
     private final ArrayList<Map<String, ?>> items;
     private final Class[] activities;
 
-    public DrawerMenuContents(Context ctx) {
+    public DrawerMenuContents() {
         activities = new Class[3];
         items = new ArrayList<>(3);
 

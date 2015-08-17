@@ -22,8 +22,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.android.uamp.R;
 
@@ -45,14 +43,11 @@ public class MainMenuActivity extends ActionBarCastActivity {
                 };
 
         ListView lv = (ListView) findViewById(R.id.MainMenuList);
-        lv.setAdapter(new ArrayAdapter<String>(this, R.layout.main_menu_list_item, R.id.menu_item, mainMenuArray));
+        lv.setAdapter(new ArrayAdapter<>(this, R.layout.main_menu_list_item, R.id.menu_item, mainMenuArray));
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView< ?> parent, View view, int position, long id) {
-
-                String actressName = ((TextView) view.findViewById(R.id.menu_item)).getText().toString();
-
                 //Toast.makeText(getApplicationContext(), actressName, Toast.LENGTH_SHORT).show();
                 position += -1;
                 if (position >= 0) {

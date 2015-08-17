@@ -20,10 +20,8 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,6 +47,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
@@ -61,11 +61,6 @@ import javax.xml.xpath.XPathFactory;
  */
 public class NewCalendarActivity extends ActionBarCastActivity {
     private String detailsURL = "";
-    private static final int DATE_DIALOG_ID = 1;
-    public int year;
-    public int month;
-    public int day;
-    EditText txtDate;
     private String detailsName;
     private String detailsDescription;
     private String detailsInfo;
@@ -77,16 +72,12 @@ public class NewCalendarActivity extends ActionBarCastActivity {
     private int endDay = 0;
     private int endMonth = 0;
     private int endYear = 0;
-    //private Context context = null;
     private String searchresults = "a";
-    private List<String> CalendarNameArray = new ArrayList<String>();
-    private List<String> CalendarDetailsURLArray = new ArrayList<String>();
-    private List<String> LocationArray = new ArrayList<String>();
-    private List<String> DateArray = new ArrayList<String>();
-    private List<String> PicturesArray = new ArrayList<String>();
-    List<String> urlArray = new ArrayList<String>();
-    ListView listview;
-    ArrayAdapter adapter;
+    private List<String> CalendarNameArray = new ArrayList<>();
+    private List<String> CalendarDetailsURLArray = new ArrayList<>();
+    private List<String> LocationArray = new ArrayList<>();
+    private List<String> DateArray = new ArrayList<>();
+    private List<String> PicturesArray = new ArrayList<>();
     private ProgressDialog mProgressDialog;
     private boolean catalogUnavailableError;
     private MenuItem search_byAll;
@@ -99,12 +90,6 @@ public class NewCalendarActivity extends ActionBarCastActivity {
     private MenuItem menu_upper_cape_library;
     private MenuItem menu_wildwood_crest_library;
     private MenuItem menu_woodbine_library;
-    MenuItem format_dvd_MenuItem;
-    MenuItem format_Bray_disc_MenuItem;
-    MenuItem format_videotape_MenuItem;
-    MenuItem format_music_cd_MenuItem;
-    MenuItem format_sound_recording_MenuItem;
-    MenuItem format_serial_MenuItem;
     private SearchView searchView;
     private View footerView;
     private int searchPage;
@@ -157,6 +142,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
             }
 
         }
+        assert moreButton != null;
         if (moreButton.equals("true")) {
             searchPage += 1;
 
@@ -513,7 +499,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
             BufferedReader in1 = new BufferedReader(
                     new InputStreamReader(con1.getInputStream()));
             String inputLine1;
-            StringBuffer response1 = new StringBuffer();
+            StringBuilder response1 = new StringBuilder();
 
             while ((inputLine1 = in1.readLine()) != null) {
                 response1.append(inputLine1);
@@ -547,7 +533,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
                 //Node tNode = (Node)xpath.evaluate(".//td[@class = 'event_values']", anode, XPathConstants.NODE);
                 Node subNode = (Node) xpath.evaluate(".//span[@class='event_title_list_special_class']", anode, XPathConstants.NODE);
                 String testName = xpath.evaluate(".", subNode);
-                if (testName != "") {
+                if (!Objects.equals(testName, "")) {
                     CalendarNameArray.add(testName);
                     subNode = (Node) xpath.evaluate(".//td/text()[preceding-sibling::br[4]]", anode, XPathConstants.NODE);
                     String testAuth = xpath.evaluate(".", subNode);
@@ -563,7 +549,7 @@ public class NewCalendarActivity extends ActionBarCastActivity {
                         testPic = "http://events.cmclibrary.org/" + xpath.evaluate("./@src", subNode);
 
                     }
-                    if (testPic == "") {
+                    if (Objects.equals(testPic, "")) {
                         testPic = "/";
                     }
                     PicturesArray.add(testPic);
@@ -572,7 +558,6 @@ public class NewCalendarActivity extends ActionBarCastActivity {
 
         }
     private void doDetailSearch() throws Exception {
-        String USER_AGENT = "Chrome/43.0.2357.134";
         URL obj1 = new URL(detailsURL);
         HttpURLConnection.setFollowRedirects(true);
 
@@ -587,10 +572,11 @@ public class NewCalendarActivity extends ActionBarCastActivity {
 
         con1.setRequestMethod("GET");
         int responseCode = con1.getResponseCode();
+        //Need to handle page not found etc...
         BufferedReader in1 = new BufferedReader(
                 new InputStreamReader(con1.getInputStream()));
         String inputLine1;
-        StringBuffer response1 = new StringBuffer();
+        StringBuilder response1 = new StringBuilder();
 
         while ((inputLine1 = in1.readLine()) != null) {
             response1.append(inputLine1);

@@ -22,7 +22,6 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -50,6 +49,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -64,21 +64,16 @@ import javax.xml.xpath.XPathFactory;
 public class MainCatalogActivity extends ActionBarCastActivity{
     private String detailsURL = "";
     private String detailsTitle;
-    String detailsSummary;
     private String detailsAvailability= "";
     private ListView lv;
     private Parcelable state = null;
     private boolean firstDetailSearch;
-    //private Context context = null;
     private String searchresults = "a";
-    private List<String> CatalogDetailsURLArray = new ArrayList<String>();
-    private List<String> CatalogArray = new ArrayList<String>();
-    private List<String> AuthorArray = new ArrayList<String>();
-    private List<String> FormatArray = new ArrayList<String>();
-    private List<String> PicturesArray = new ArrayList<String>();
-    List<String> urlArray = new ArrayList<String>();
-    ListView listview;
-    ArrayAdapter adapter;
+    private List<String> CatalogDetailsURLArray = new ArrayList<>();
+    private List<String> CatalogArray = new ArrayList<>();
+    private List<String> AuthorArray = new ArrayList<>();
+    private List<String> FormatArray = new ArrayList<>();
+    private List<String> PicturesArray = new ArrayList<>();
     private ProgressDialog mProgressDialog;
     private boolean catalogUnavailableError;
     private MenuItem searchby_any_MenuItem;
@@ -139,6 +134,7 @@ public class MainCatalogActivity extends ActionBarCastActivity{
             }
 
         }
+        assert moreButton != null;
         if(moreButton.equals("true")){
             searchPage += 1;
 
@@ -344,7 +340,7 @@ public class MainCatalogActivity extends ActionBarCastActivity{
     }
     private void showDetails() {
         // Inflate your custom layout containing 2 DatePickers
-        LayoutInflater inflater = (LayoutInflater) getLayoutInflater();
+        LayoutInflater inflater = getLayoutInflater();
         View customView = inflater.inflate(R.layout.catalog_details, null);
 
         // Build the dialog
@@ -371,16 +367,14 @@ public class MainCatalogActivity extends ActionBarCastActivity{
     private void doBookSearch() throws Exception {
         String Qurl = "http://cat.cmclibrary.org/polaris/search/searchresults.aspx?ctx=1.1033.0.0.3&type=Keyword&term=";
         //String bookSort = "&limit=TOM=bks";
-        if (searchresults == ""){
+        if (Objects.equals(searchresults, "")){
             searchresults = "";
         }
         String url1 = "http://cat.cmclibrary.org/polaris/search/components/ajaxResults.aspx?page=";
         url1 += String.valueOf(searchPage);
         String url = Qurl + URLEncoder.encode(searchresults, "UTF-8");
         //url += bookSort;
-        if ( (searchby_any_MenuItem == null) || (searchby_any_MenuItem.isChecked() ) ){
-        }
-        else {
+        if ((searchby_any_MenuItem != null) && (!searchby_any_MenuItem.isChecked())) {
             if (searchby_title_MenuItem.isChecked()) {
                 url += "&by=TI";
             }
@@ -391,10 +385,7 @@ public class MainCatalogActivity extends ActionBarCastActivity{
                 url += "&by=ISBN";
             }
         }
-        if( (format_any_MenuItem == null) || format_any_MenuItem.isChecked() ){
-
-        }
-        else {
+        if ((format_any_MenuItem != null) && !format_any_MenuItem.isChecked()) {
             if (format_book_MenuItem.isChecked()) {
                 url += "&limit=TOM=bks";
             }
@@ -448,6 +439,7 @@ public class MainCatalogActivity extends ActionBarCastActivity{
         con1.setRequestProperty("Content-Type", "text/plain; charset=utf-8");
         con1.setRequestMethod("GET");
         int responseCode = con1.getResponseCode();
+        //Need to handle page not found etc...
 
         //Now get the search results
         con1 = (HttpURLConnection) obj1.openConnection();
@@ -455,7 +447,7 @@ public class MainCatalogActivity extends ActionBarCastActivity{
         BufferedReader in1 = new BufferedReader(
                 new InputStreamReader(con1.getInputStream()));
         String inputLine1;
-        StringBuffer response1 = new StringBuffer();
+        StringBuilder response1 = new StringBuilder();
 
         while ((inputLine1 = in1.readLine()) != null) {
             response1.append(inputLine1);
@@ -497,7 +489,7 @@ public class MainCatalogActivity extends ActionBarCastActivity{
             Node anode = testNode.item(index);
             Node subNode = (Node)xpath.evaluate(".//span[@class='nsm-short-item nsm-e135']", anode, XPathConstants.NODE);
             String testName = xpath.evaluate(".", subNode);
-            if(testName != "") {
+            if(!Objects.equals(testName, "")) {
                 CatalogArray.add(testName);
                 subNode = (Node)xpath.evaluate(".//span[@class='nsm-short-item nsm-e118']", anode, XPathConstants.NODE);
                 String testAuth = xpath.evaluate(".",subNode);
@@ -511,7 +503,7 @@ public class MainCatalogActivity extends ActionBarCastActivity{
                 CatalogDetailsURLArray.add(testURL);
                 subNode = (Node)xpath.evaluate(".//img[@class='thumbnail']/@src", anode, XPathConstants.NODE);
                 String testPic = xpath.evaluate(".",subNode);
-                if(testPic == ""){
+                if(Objects.equals(testPic, "")){
                     testPic= "/";
                 }
                 PicturesArray.add(testPic);
@@ -520,7 +512,6 @@ public class MainCatalogActivity extends ActionBarCastActivity{
 
     }
     private void doDetailSearch() throws Exception {
-        String USER_AGENT = "Chrome/43.0.2357.134";
         URL obj1 = new URL(detailsURL);
         HttpURLConnection.setFollowRedirects(true);
         //Get session ID if necessary
@@ -550,10 +541,12 @@ public class MainCatalogActivity extends ActionBarCastActivity{
 
         con1.setRequestMethod("GET");
         int responseCode = con1.getResponseCode();
+        //Need to handle page not found etc...
+
         BufferedReader in1 = new BufferedReader(
                 new InputStreamReader(con1.getInputStream()));
         String inputLine1;
-        StringBuffer response1 = new StringBuffer();
+        StringBuilder response1 = new StringBuilder();
 
         while ((inputLine1 = in1.readLine()) != null) {
             response1.append(inputLine1);
@@ -577,19 +570,11 @@ public class MainCatalogActivity extends ActionBarCastActivity{
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
         Document document = db.parse(source);
-
         XPathFactory xpathFactory = XPathFactory.newInstance();
         XPath xpath = xpathFactory.newXPath();
-        /*
-        Node testNode1 = (Node) xpath.evaluate("//div[@class='nsm-long-item nsm-e35']", document, XPathConstants.NODE);
-        detailsTitle = xpath.evaluate(".", testNode1);
-        testNode1 = (Node) xpath.evaluate("//div[@class='nsm-long-item nsm-e9']", document, XPathConstants.NODE);
-        detailsSummary = xpath.evaluate(".",testNode1);
-        */
         Node testNode1 = (Node) xpath.evaluate("/html/body/div[1]/b", document, XPathConstants.NODE);
         detailsTitle = xpath.evaluate(".", testNode1);
         NodeList testNode = (NodeList)xpath.evaluate("//td[@class='location']", testNode1, XPathConstants.NODESET);
-        int i = testNode.getLength();
         for (int index = 0; index < testNode.getLength(); index++) {
             Node anode = testNode.item(index);
             detailsAvailability += xpath.evaluate(".",anode) + "\r\n";
