@@ -46,6 +46,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -508,6 +509,97 @@ public class NewCalendarActivity extends ActionBarCastActivity {
             }
             in1.close();
             String str = response1.toString();
+        int i = 0;
+        int a1;
+        int a0;
+        int a2;
+        String string1 = str;
+        do{
+            a0 = string1.indexOf("td class=\"event_values\"");
+            string1 = string1.substring(a0 + 1, string1.length());
+            i = i+1;
+            String test  = string1;
+
+            a1 = test.indexOf("<img src");
+            String tempstr = test.substring(a1+10,a1+60);
+            if(tempstr != null){
+                a2 = tempstr.indexOf("\"");
+                if(a2 != -1){
+                    PicturesArray.add("http://events.cmclibrary.org/" + tempstr.substring(0,a2));
+                }
+                else{
+                    PicturesArray.add("/");
+                }
+            }
+            Log.e("HTTP:", PicturesArray.get(PicturesArray.size()-1));
+
+
+            a1 = test.indexOf("<a href");
+            tempstr = test.substring(a1+9,a1+400);
+            if(tempstr != null){
+                a2 = tempstr.indexOf("\"");
+                if(a2 != -1){
+                    CalendarDetailsURLArray.add(tempstr.substring(0,a2));
+                }
+                else{
+                    CalendarDetailsURLArray.add(" ");
+                }
+            }
+            Log.e("HTTP:", CalendarDetailsURLArray.get(CalendarDetailsURLArray.size()-1));
+
+            a1 = test.indexOf("event_title_list_special");
+            //System.out.println("Event Index:" + Integer.toString(a1));
+            tempstr = test.substring(a1 + 69, a1 + 200);
+            if(tempstr != null){
+                a2 = tempstr.indexOf("<");
+                if(a2 != -1){
+                    CalendarNameArray.add(tempstr.substring(0,a2));
+                }
+                else{
+                    CalendarNameArray.add(" ");
+                }
+            }
+            Log.e("HTTP:", CalendarNameArray.get(CalendarNameArray.size()-1));
+
+            a1 = test.indexOf("Date:");
+            //System.out.println("Date Index:" + Integer.toString(a1));
+            tempstr = test.substring(a1 + 10, a1 + 200);
+
+            if(tempstr != null){
+                a2 = tempstr.indexOf("<");
+                if(a2 != -1){
+                    DateArray.add(tempstr.substring(0, a2));
+                }
+                else{
+                    DateArray.add(" ");
+                }
+            }
+            Log.e("HTTP:", DateArray.get(DateArray.size()-1));
+
+            a1 = test.indexOf("Library:");
+            //System.out.println("Library Index:" + Integer.toString(a1));
+            tempstr = test.substring(a1 + 12, a1 + 200);
+
+            if(tempstr != null){
+                a2 = tempstr.indexOf("<");
+                if(a2 != -1){
+                    LocationArray.add(tempstr.substring(0,a2));
+                }
+                else{
+                    LocationArray.add(" ");
+                }
+            }
+            Log.e("HTTP:", LocationArray.get(LocationArray.size()-1));
+            if(i==24){
+                Log.e("HTTP", "Yo");
+            }
+
+        }while(i < 25);
+/*
+        //System.out.println("Image Index:" + Integer.toString(a1));
+        String tempstr = str.substring(a1+9,a1+60);
+        tempstr = tempstr.substring(0,tempstr.indexOf(" "));
+        System.out.println("Image:" + tempstr);
         Log.e("HTTP", "7");
 
             HtmlCleaner cleaner = new HtmlCleaner();
@@ -564,8 +656,11 @@ public class NewCalendarActivity extends ActionBarCastActivity {
                 }
             }
         Log.e("HTTP", "9");
-
+*/
         }
+
+
+
     private void doDetailSearch() throws Exception {
         URL obj1 = new URL(detailsURL);
         HttpURLConnection.setFollowRedirects(true);
